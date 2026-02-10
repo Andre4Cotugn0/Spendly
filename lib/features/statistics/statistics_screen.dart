@@ -19,6 +19,19 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   int _touchedIndex = -1;
+  // Cache per evitare query duplicate nello stesso frame
+  Future<Map<String, double>>? _categoryTotalsCache;
+  int _cachedYear = -1;
+  int _cachedMonth = -1;
+
+  Future<Map<String, double>> _getCategoryTotals(ExpenseProvider provider) {
+    if (_cachedYear != provider.selectedYear || _cachedMonth != provider.selectedMonth) {
+      _cachedYear = provider.selectedYear;
+      _cachedMonth = provider.selectedMonth;
+      _categoryTotalsCache = provider.getTotalByCategory();
+    }
+    return _categoryTotalsCache!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +88,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildPieChartSection(ExpenseProvider provider) {
     return FutureBuilder<Map<String, double>>(
-      future: provider.getTotalByCategory(),
+      future: _getCategoryTotals(provider),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return _buildEmptyChart('Nessun dato per questo mese');
@@ -184,7 +197,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   Widget _buildCategoryBreakdown(ExpenseProvider provider) {
     return FutureBuilder<Map<String, double>>(
-      future: provider.getTotalByCategory(),
+      future: _getCategoryTotals(provider),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox.shrink();

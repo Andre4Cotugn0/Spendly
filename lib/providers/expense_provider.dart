@@ -5,13 +5,13 @@ import '../data/models/category.dart';
 import '../data/models/subscription.dart';
 import '../data/models/budget.dart';
 import '../data/models/debt.dart';
-import '../data/services/google_drive_service.dart';
+import '../data/services/csv_export_service.dart';
 import '../data/services/home_widget_service.dart';
 import '../data/services/notification_service.dart';
 
 class ExpenseProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper.instance;
-  final GoogleDriveService _driveService = GoogleDriveService.instance;
+  final CsvExportService _csvService = CsvExportService.instance;
   final HomeWidgetService _widgetService = HomeWidgetService.instance;
   final NotificationService _notificationService = NotificationService.instance;
 
@@ -22,8 +22,6 @@ class ExpenseProvider extends ChangeNotifier {
   List<Debt> _debts = [];
   bool _isLoading = false;
   String? _error;
-  bool _isBackingUp = false;
-  DateTime? _lastBackupDate;
 
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
@@ -39,15 +37,8 @@ class ExpenseProvider extends ChangeNotifier {
   List<Debt> get settledDebts => _debts.where((d) => d.isSettled).toList();
   bool get isLoading => _isLoading;
   String? get error => _error;
-  bool get isBackingUp => _isBackingUp;
-  DateTime? get lastBackupDate => _lastBackupDate;
   int get selectedYear => _selectedYear;
   int get selectedMonth => _selectedMonth;
-
-  bool get isGoogleSignedIn => _driveService.isSignedIn;
-  String? get userEmail => _driveService.userEmail;
-  String? get userName => _driveService.userName;
-  String? get userPhoto => _driveService.userPhoto;
 
   /// Carica tutti i dati iniziali
   Future<void> loadData() async {
@@ -56,7 +47,7 @@ class ExpenseProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Carica categorie PRIMA di tutto
+      // Carica categorie PRIMA (servono per le relazioni)
       try {
         _categories = await _db.getAllCategories();
       } catch (e) {
@@ -64,40 +55,20 @@ class ExpenseProvider extends ChangeNotifier {
         _error = 'Errore caricamento categorie: $e';
       }
 
-      // Carica gli altri dati
+      // Carica tutti i dati in parallelo
       try {
-        _expenses = await _db.getExpensesByMonth(_selectedYear, _selectedMonth);
-        _subscriptions = await _db.getAllSubscriptions();
-        _budgets = await _db.getBudgetsByMonth(_selectedYear, _selectedMonth);
-        _debts = await _db.getAllDebts();
+        final results = await Future.wait([
+          _db.getExpensesByMonth(_selectedYear, _selectedMonth),
+          _db.getAllSubscriptions(),
+          _db.getBudgetsByMonth(_selectedYear, _selectedMonth),
+          _db.getAllDebts(),
+        ]);
+        _expenses = results[0] as List<Expense>;
+        _subscriptions = results[1] as List<Subscription>;
+        _budgets = results[2] as List<Budget>;
+        _debts = results[3] as List<Debt>;
       } catch (e) {
         debugPrint('Errore caricamento dati principali: $e');
-      }
-
-      // Inizializza servizi (non bloccare se fallisce)
-      try {
-        await _widgetService.initialize();
-        await _widgetService.updateWidget();
-      } catch (e) {
-        debugPrint('Errore widget service: $e');
-      }
-
-      try {
-        await _notificationService.initialize();
-        await _notificationService.scheduleAllSubscriptionReminders(activeSubscriptions);
-      } catch (e) {
-        debugPrint('Errore notification service: $e');
-      }
-
-      // Google Sign-In in un try-catch separato per non bloccare il resto
-      try {
-        await _driveService.signInSilently();
-        if (_driveService.isSignedIn) {
-          _lastBackupDate = await _driveService.getLastBackupDate();
-        }
-      } catch (e) {
-        debugPrint('Errore Google Drive sign in silenzioso: $e');
-        // Non è critico se fallisce il login silenzioso
       }
     } catch (e) {
       _error = 'Errore caricamento dati: $e';
@@ -106,6 +77,33 @@ class ExpenseProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+
+    // Servizi secondari: fire-and-forget (non bloccano la UI)
+    _initServicesInBackground();
+  }
+
+  /// Inizializza widget e notifiche senza bloccare il rendering.
+  void _initServicesInBackground() {
+    // Widget service
+    Future(() async {
+      try {
+        await _widgetService.initialize();
+        await _widgetService.updateWidget();
+      } catch (e) {
+        debugPrint('Errore widget service: $e');
+      }
+    });
+
+    // Notification service
+    Future(() async {
+      try {
+        await _notificationService.initialize();
+        await _notificationService.scheduleAllSubscriptionReminders(activeSubscriptions);
+      } catch (e) {
+        debugPrint('Errore notification service: $e');
+      }
+    });
+
   }
 
   // ===== MONTH NAVIGATION =====
@@ -143,7 +141,6 @@ class ExpenseProvider extends ChangeNotifier {
       await _refreshExpenses();
       await _widgetService.updateWidget();
       await _checkBudgetAlert(expense);
-      await _autoBackup();
       return true;
     } catch (e) {
       _error = 'Errore aggiunta spesa: $e';
@@ -157,7 +154,6 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.updateExpense(expense);
       await _refreshExpenses();
       await _widgetService.updateWidget();
-      await _autoBackup();
       return true;
     } catch (e) {
       _error = 'Errore aggiornamento spesa: $e';
@@ -171,7 +167,6 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.deleteExpense(id);
       await _refreshExpenses();
       await _widgetService.updateWidget();
-      await _autoBackup();
       return true;
     } catch (e) {
       _error = 'Errore eliminazione spesa: $e';
@@ -207,7 +202,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.insertCategory(category);
       _categories = await _db.getAllCategories();
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -221,7 +215,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.updateCategory(category);
       _categories = await _db.getAllCategories();
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -242,7 +235,6 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.deleteCategory(id);
       _categories = await _db.getAllCategories();
       await _refreshExpenses();
-      await _autoBackup();
       return true;
     } catch (e) {
       _error = 'Errore eliminazione categoria: $e';
@@ -266,7 +258,6 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.insertSubscription(sub);
       _subscriptions = await _db.getAllSubscriptions();
       await _notificationService.scheduleSubscriptionReminder(sub);
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -285,7 +276,6 @@ class ExpenseProvider extends ChangeNotifier {
       } else {
         await _notificationService.cancelSubscriptionReminder(sub.id);
       }
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -300,7 +290,6 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.deleteSubscription(id);
       _subscriptions = await _db.getAllSubscriptions();
       await _notificationService.cancelSubscriptionReminder(id);
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -334,7 +323,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.insertDebt(debt);
       _debts = await _db.getAllDebts();
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -348,7 +336,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.updateDebt(debt);
       _debts = await _db.getAllDebts();
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -362,7 +349,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.deleteDebt(id);
       _debts = await _db.getAllDebts();
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -411,7 +397,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.upsertBudget(budget);
       _budgets = await _db.getBudgetsByMonth(_selectedYear, _selectedMonth);
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -425,7 +410,6 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       await _db.deleteBudget(id);
       _budgets = await _db.getBudgetsByMonth(_selectedYear, _selectedMonth);
-      await _autoBackup();
       notifyListeners();
       return true;
     } catch (e) {
@@ -503,84 +487,14 @@ class ExpenseProvider extends ChangeNotifier {
     return await _db.getMonthlyTotals(months: months);
   }
 
-  // ===== GOOGLE DRIVE =====
+  // ===== CSV EXPORT =====
 
-  Future<bool> signInGoogle() async {
-    try {
-      final success = await _driveService.signIn();
-      if (success) {
-        _lastBackupDate = await _driveService.getLastBackupDate();
-      }
-      notifyListeners();
-      return success;
-    } catch (e) {
-      _error = 'Errore login Google: $e';
-      notifyListeners();
-      // Rilancia l'eccezione per permettere gestione nell'UI
-      rethrow;
-    }
+  Future<bool> exportExpensesCsv() async {
+    return await _csvService.exportExpenses();
   }
 
-  Future<void> signOutGoogle() async {
-    await _driveService.signOut();
-    _lastBackupDate = null;
-    notifyListeners();
-  }
-
-  Future<bool> backupToGoogleDrive() async {
-    if (!_driveService.isSignedIn) {
-      final success = await signInGoogle();
-      if (!success) return false;
-    }
-    _isBackingUp = true;
-    notifyListeners();
-    try {
-      final success = await _driveService.backup();
-      if (success) _lastBackupDate = DateTime.now();
-      return success;
-    } catch (e) {
-      _error = 'Errore backup: $e';
-      return false;
-    } finally {
-      _isBackingUp = false;
-      notifyListeners();
-    }
-  }
-
-  Future<bool> restoreFromGoogleDrive() async {
-    if (!_driveService.isSignedIn) {
-      final success = await signInGoogle();
-      if (!success) return false;
-    }
-    _isLoading = true;
-    notifyListeners();
-    try {
-      final success = await _driveService.restore();
-      if (success) await loadData();
-      return success;
-    } catch (e) {
-      _error = 'Errore ripristino: $e';
-      return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> _autoBackup() async {
-    if (_driveService.isSignedIn) {
-      _isBackingUp = true;
-      notifyListeners();
-      try {
-        final success = await _driveService.backup();
-        if (success) _lastBackupDate = DateTime.now();
-      } catch (e) {
-        debugPrint('Errore auto-backup: $e');
-      } finally {
-        _isBackingUp = false;
-        notifyListeners();
-      }
-    }
+  Future<bool> exportAllDataCsv() async {
+    return await _csvService.exportAllData();
   }
 
   // ===== NOTIFICATIONS =====

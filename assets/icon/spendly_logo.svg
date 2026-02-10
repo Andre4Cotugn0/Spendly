@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Gradiente viola → ciano per la S -->
+    <linearGradient id="sGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6C63FF"/>
+      <stop offset="100%" stop-color="#00D9FF"/>
+    </linearGradient>
+
+    <!-- Glow viola di sfondo -->
+    <radialGradient id="glowViolet" cx="42%" cy="38%" r="45%">
+      <stop offset="0%" stop-color="#6C63FF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#6C63FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Glow ciano di sfondo -->
+    <radialGradient id="glowCyan" cx="62%" cy="65%" r="40%">
+      <stop offset="0%" stop-color="#00D9FF" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#00D9FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Gradiente moneta -->
+    <radialGradient id="coinGrad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#33E8FF"/>
+      <stop offset="100%" stop-color="#00D9FF"/>
+    </radialGradient>
+
+    <!-- Ombra morbida moneta -->
+    <filter id="coinGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Ombra sottile per la S -->
+    <filter id="sShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="18" flood-color="#6C63FF" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- SFONDO -->
+  <rect width="1024" height="1024" rx="220" fill="#0D0D0D"/>
+
+  <!-- Glow sfondo viola -->
+  <rect width="1024" height="1024" rx="220" fill="url(#glowViolet)"/>
+
+  <!-- Glow sfondo ciano -->
+  <rect width="1024" height="1024" rx="220" fill="url(#glowCyan)"/>
+
+  <!-- Sottile bordo interno -->
+  <rect x="32" y="32" width="960" height="960" rx="196" fill="none" stroke="#6C63FF" stroke-opacity="0.06" stroke-width="2"/>
+
+  <!-- S STILIZZATA — composta da due archi e un raccordo diagonale -->
+  <g filter="url(#sShadow)">
+    <path
+      d="
+        M 390 330
+        C 390 270, 460 220, 540 220
+        C 620 220, 680 260, 680 320
+        C 680 390, 610 420, 540 445
+        C 470 470, 370 505, 370 590
+        C 370 660, 430 720, 540 720
+        C 640 720, 680 680, 680 630
+      "
+      fill="none"
+      stroke="url(#sGrad)"
+      stroke-width="78"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <!-- MONETA decorativa — cerchio ciano con € -->
+  <g filter="url(#coinGlow)">
+    <circle cx="720" cy="240" r="62" fill="url(#coinGrad)"/>
+    <text
+      x="720" y="244"
+      text-anchor="middle"
+      dominant-baseline="central"
+      font-family="Arial, Helvetica, sans-serif"
+      font-weight="700"
+      font-size="62"
+      fill="#0D0D0D"
+    >€</text>
+  </g>
+
+  <!-- Piccolo accento viola in basso a sinistra -->
+  <circle cx="290" cy="760" r="24" fill="#6C63FF" opacity="0.7"/>
+
+  <!-- Micro-linea decorativa -->
+  <line x1="240" y1="810" x2="340" y2="810" stroke="#6C63FF" stroke-opacity="0.2" stroke-width="3" stroke-linecap="round"/>
+
+</svg>

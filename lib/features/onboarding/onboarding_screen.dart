@@ -37,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardingPage(
       icon: Icons.bar_chart_rounded,
       title: 'Statistiche dettagliate',
-      subtitle: 'Grafici interattivi, budget mensile,\nesportazione CSV e backup su Google Drive.',
+      subtitle: 'Grafici interattivi, budget mensile\ned esportazione CSV.',
       gradient: [AppColors.primary, AppColors.secondary],
     ),
   ];

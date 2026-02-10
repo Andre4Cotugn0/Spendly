@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,13 +15,21 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   await initializeDateFormatting('it_IT', null);
-  
+
+  // Usa solo i font bundled, non scaricarli da rete (blocca il main thread)
+  GoogleFonts.config.allowRuntimeFetching = false;
+
   final prefs = await SharedPreferences.getInstance();
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
   
+  // Edge-to-edge: barra di stato e navigazione trasparenti
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
   
@@ -72,16 +81,25 @@ class _AppWithOverlay extends StatelessWidget {
         final brightness = Theme.of(context).brightness;
         final isDark = brightness == Brightness.dark;
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            showOnboarding ? const OnboardingScreen() : const HomeScreen(),
-            if (themeProvider.isChangingTheme)
-              ThemeTransitionOverlay(
-                isChanging: themeProvider.isChangingTheme,
-                isDarkTheme: isDark,
-              ),
-          ],
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarDividerColor: Colors.transparent,
+            systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              showOnboarding ? const OnboardingScreen() : const HomeScreen(),
+              if (themeProvider.isChangingTheme)
+                ThemeTransitionOverlay(
+                  isChanging: themeProvider.isChangingTheme,
+                  isDarkTheme: isDark,
+                ),
+            ],
+          ),
         );
       },
     );

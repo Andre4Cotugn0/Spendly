@@ -31,14 +31,9 @@ class SettingsScreen extends StatelessWidget {
                   child: _buildThemeSection(context),
                 ),
 
-                // Google Account Section
+                // Export CSV Section
                 SliverToBoxAdapter(
-                  child: _buildGoogleSection(context, provider),
-                ),
-
-                // Backup Section
-                SliverToBoxAdapter(
-                  child: _buildBackupSection(context, provider),
+                  child: _buildExportSection(context, provider),
                 ),
 
                 // Budget Section
@@ -315,7 +310,7 @@ class SettingsScreen extends StatelessWidget {
     ).animate().fadeIn(delay: 250.ms, duration: 300.ms);
   }
 
-  Widget _buildGoogleSection(BuildContext context, ExpenseProvider provider) {
+  Widget _buildExportSection(BuildContext context, ExpenseProvider provider) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
@@ -328,85 +323,7 @@ class SettingsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
-              'Account Google',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
-          if (provider.isGoogleSignedIn) ...[
-            ListTile(
-              leading: CircleAvatar(
-                backgroundImage: provider.userPhoto != null
-                    ? NetworkImage(provider.userPhoto!)
-                    : null,
-                backgroundColor: AppColors.primary,
-                child: provider.userPhoto == null
-                    ? Text(
-                        provider.userName?.substring(0, 1).toUpperCase() ?? 'U',
-                        style: const TextStyle(color: Colors.white),
-                      )
-                    : null,
-              ),
-              title: Text(provider.userName ?? 'Utente'),
-              subtitle: Text(provider.userEmail ?? ''),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(Icons.logout, color: AppColors.error),
-              title: const Text('Disconnetti'),
-              onTap: () => _confirmSignOut(context, provider),
-            ),
-          ] else ...[
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.cloud_off, size: 24),
-              ),
-              title: const Text('Non connesso'),
-              subtitle: const Text('Accedi per attivare il backup automatico'),
-            ),
-            // Avviso configurazione iOS
-            // RIMOSSO: alert su iOS
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _signInWithGoogle(context, provider),
-                  icon: const Icon(Icons.login),
-                  label: const Text('Accedi con Google'),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    ).animate().fadeIn(delay: 50.ms, duration: 300.ms);
-  }
-
-  Widget _buildBackupSection(BuildContext context, ExpenseProvider provider) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Text(
-              'Backup & Ripristino',
+              'Esporta dati',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -419,82 +336,62 @@ class SettingsScreen extends StatelessWidget {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
+                color: AppColors.primary.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                provider.isGoogleSignedIn ? Icons.cloud_done : Icons.cloud_off,
-                color: provider.isGoogleSignedIn
-                    ? AppColors.success
-                    : AppColors.textTertiary,
-              ),
+              child: Icon(Icons.receipt_long, color: AppColors.primary, size: 20),
             ),
-            title: const Text('Backup automatico'),
-            subtitle: Text(
-              provider.isGoogleSignedIn
-                  ? 'Attivo - I dati vengono salvati ad ogni modifica'
-                  : 'Disattivo - Accedi con Google per attivarlo',
-              style: TextStyle(
-                color: provider.isGoogleSignedIn
-                    ? AppColors.success
-                    : AppColors.textTertiary,
-              ),
-            ),
-          ),
-          if (provider.lastBackupDate != null)
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.access_time),
-              ),
-              title: const Text('Ultimo backup'),
-              subtitle: Text(Formatters.dateTime(provider.lastBackupDate!)),
-            ),
-          const Divider(height: 1),
-          ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.cloud_upload),
-            ),
-            title: const Text('Backup manuale'),
-            subtitle: const Text('Salva ora su Google Drive'),
-            trailing: provider.isBackingUp
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.chevron_right),
-            enabled: provider.isGoogleSignedIn && !provider.isBackingUp,
-            onTap: () => _manualBackup(context, provider),
-          ),
-          ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.cloud_download),
-            ),
-            title: const Text('Ripristina'),
-            subtitle: const Text('Recupera dati da Google Drive'),
+            title: const Text('Esporta spese'),
+            subtitle: const Text('Genera un file CSV con tutte le spese'),
             trailing: const Icon(Icons.chevron_right),
-            enabled: provider.isGoogleSignedIn && !provider.isLoading,
-            onTap: () => _confirmRestore(context, provider),
+            onTap: () => _exportExpenses(context, provider),
+          ),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withAlpha(26),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.file_download_outlined, color: AppColors.secondary, size: 20),
+            ),
+            title: const Text('Esporta tutto'),
+            subtitle: const Text('Spese, categorie, abbonamenti e debiti'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _exportAllData(context, provider),
           ),
           const SizedBox(height: 8),
         ],
       ),
-    ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
+    ).animate().fadeIn(delay: 50.ms, duration: 300.ms);
+  }
+
+  void _exportExpenses(BuildContext context, ExpenseProvider provider) async {
+    final success = await provider.exportExpensesCsv();
+    if (context.mounted) {
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Errore durante l\'export'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _exportAllData(BuildContext context, ExpenseProvider provider) async {
+    final success = await provider.exportAllDataCsv();
+    if (context.mounted) {
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Errore durante l\'export'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildAppInfo(BuildContext context) {
@@ -547,133 +444,6 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(delay: 350.ms, duration: 300.ms);
-  }
-
-  void _signInWithGoogle(BuildContext context, ExpenseProvider provider) async {
-    try {
-      final success = await provider.signInGoogle();
-      if (!context.mounted) return;
-      
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Accesso effettuato! Backup automatico attivo.'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Accesso annullato'),
-            backgroundColor: AppColors.warning,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      
-      String errorMsg = 'Errore durante l\'accesso';
-      Duration duration = const Duration(seconds: 4);
-      
-      final errorStr = e.toString().toLowerCase();
-      
-      // Su iOS, se manca la configurazione Google Sign-In
-      if (errorStr.contains('idtokenrequested') || 
-          errorStr.contains('platformexception') ||
-          errorStr.contains('sign_in_failed') ||
-          errorStr.contains('placeholder') ||
-          errorStr.contains('no matching client found')) {
-        errorMsg = 'Google Sign-In non configurato per iOS.\n'
-                   'Consulta GOOGLE_SIGNIN_SETUP.md per le istruzioni.';
-        duration = const Duration(seconds: 6);
-      } else if (errorStr.contains('network') || errorStr.contains('connection')) {
-        errorMsg = 'Errore di connessione. Verifica la tua rete.';
-      } else if (errorStr.contains('canceled') || errorStr.contains('cancelled')) {
-        errorMsg = 'Login annullato';
-      }
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMsg),
-          backgroundColor: AppColors.error,
-          duration: duration,
-        ),
-      );
-    }
-  }
-
-  void _confirmSignOut(BuildContext context, ExpenseProvider provider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Disconnetti'),
-        content: const Text(
-          'Sei sicuro di volerti disconnettere?\n\n'
-          'Il backup automatico verrà disattivato.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annulla'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              provider.signOutGoogle();
-            },
-            child: Text('Disconnetti', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _manualBackup(BuildContext context, ExpenseProvider provider) async {
-    final success = await provider.backupToGoogleDrive();
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? 'Backup completato' : 'Errore durante il backup'),
-          backgroundColor: success ? AppColors.success : AppColors.error,
-        ),
-      );
-    }
-  }
-
-  void _confirmRestore(BuildContext context, ExpenseProvider provider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ripristina dati'),
-        content: const Text(
-          'Sei sicuro di voler ripristinare i dati dal backup?\n\n'
-          'I dati attuali verranno sostituiti con quelli salvati su Google Drive.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Annulla'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await provider.restoreFromGoogleDrive();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success ? 'Dati ripristinati' : 'Errore durante il ripristino',
-                    ),
-                    backgroundColor: success ? AppColors.success : AppColors.error,
-                  ),
-                );
-              }
-            },
-            child: const Text('Ripristina'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showBudgetDialog(BuildContext context, ExpenseProvider provider, Budget? current) {

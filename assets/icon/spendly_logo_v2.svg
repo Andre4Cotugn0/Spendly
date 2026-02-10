@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111024"/>
+      <stop offset="100%" stop-color="#0A0A14"/>
+    </linearGradient>
+
+    <linearGradient id="accent" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#7B6CFF"/>
+      <stop offset="50%" stop-color="#6C63FF"/>
+      <stop offset="100%" stop-color="#00D9FF"/>
+    </linearGradient>
+
+    <linearGradient id="arrow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00D9FF"/>
+      <stop offset="100%" stop-color="#6C63FF"/>
+    </linearGradient>
+
+    <filter id="glow1" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="38" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="glow2" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <clipPath id="roundClip">
+      <rect width="1024" height="1024" rx="224"/>
+    </clipPath>
+  </defs>
+
+  <!-- Sfondo arrotondato -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+
+  <g clip-path="url(#roundClip)">
+
+    <!-- Cerchio decorativo grande sfumato - in basso a destra -->
+    <circle cx="780" cy="820" r="320" fill="#6C63FF" opacity="0.04"/>
+    <circle cx="780" cy="820" r="200" fill="#6C63FF" opacity="0.03"/>
+
+    <!-- Cerchio decorativo - in alto a sinistra -->
+    <circle cx="220" cy="200" r="260" fill="#00D9FF" opacity="0.03"/>
+
+    <!-- === WALLET / PORTAFOGLIO STILIZZATO === -->
+    <g transform="translate(512 490)" filter="url(#glow1)">
+
+      <!-- Corpo del wallet - rettangolo arrotondato -->
+      <rect x="-230" y="-160" width="460" height="320" rx="52" 
+            fill="none" stroke="url(#accent)" stroke-width="52" stroke-linejoin="round"/>
+
+      <!-- Linguetta/patta superiore del wallet -->
+      <path d="M -178 -160 L -178 -220 Q -178 -262 -136 -262 L 80 -262 Q 120 -262 130 -225 L 150 -160"
+            fill="none" stroke="url(#accent)" stroke-width="52" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- Cerchietto "bottone" a destra (moneta che esce) -->
+      <circle cx="190" cy="20" r="48" fill="none" stroke="url(#arrow)" stroke-width="36"/>
+
+    </g>
+
+    <!-- === FRECCIA TREND verso il basso a destra (spese che scendono = controllo) === -->
+    <g filter="url(#glow2)">
+      <polyline
+        points="600,680 700,740 720,660"
+        fill="none" stroke="#00D9FF" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"
+      />
+    </g>
+
+    <!-- Tre puntini decorativi - rappresentano transazioni -->
+    <circle cx="310" cy="720" r="10" fill="#6C63FF" opacity="0.5"/>
+    <circle cx="348" cy="720" r="10" fill="#6C63FF" opacity="0.35"/>
+    <circle cx="386" cy="720" r="10" fill="#6C63FF" opacity="0.2"/>
+
+  </g>
+</svg>

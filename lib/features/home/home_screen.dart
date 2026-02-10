@@ -23,6 +23,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  // Traccia le tab già visitate per mantenerle in vita (lazy IndexedStack)
+  final Set<int> _loadedTabs = {0};
 
   @override
   void initState() {
@@ -33,6 +35,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  static const _screens = <Widget>[
+    _HomeContent(),
+    SubscriptionsScreen(),
+    DebtsScreen(),
+    StatisticsScreen(),
+    SettingsScreen(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     context.watch<ThemeProvider>();
@@ -40,12 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
-        children: const [
-          _HomeContent(),
-          SubscriptionsScreen(),
-          DebtsScreen(),
-          StatisticsScreen(),
-          SettingsScreen(),
+        children: [
+          for (int i = 0; i < _screens.length; i++)
+            _loadedTabs.contains(i) ? _screens[i] : const SizedBox.shrink(),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(),
@@ -53,11 +60,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
+    // Garantiamo un padding inferiore minimo per le ombre (almeno 16px)
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = bottomInset > 0 ? 12.0 : 24.0;
     return Material(
       type: MaterialType.transparency,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
           child: SizedBox(
             height: 75,
             child: Row(
@@ -94,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         activeIcon: Icons.autorenew,
                         label: 'Abbonamenti',
                         isActive: _currentIndex == 1,
-                        onTap: () => setState(() => _currentIndex = 1),
+                        onTap: () => setState(() { _loadedTabs.add(1); _currentIndex = 1; }),
                       ),
                     ),
                     Expanded(
@@ -103,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         activeIcon: Icons.handshake,
                         label: 'Debiti',
                         isActive: _currentIndex == 2,
-                        onTap: () => setState(() => _currentIndex = 2),
+                        onTap: () => setState(() { _loadedTabs.add(2); _currentIndex = 2; }),
                       ),
                     ),
                   ],
@@ -134,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (_currentIndex == 0) {
                         _openAddExpense(context);
                       } else {
-                        setState(() => _currentIndex = 0);
+                        setState(() { _loadedTabs.add(0); _currentIndex = 0; });
                       }
                     },
                     customBorder: const CircleBorder(),
@@ -195,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         activeIcon: Icons.bar_chart,
                         label: 'Statistiche',
                         isActive: _currentIndex == 3,
-                        onTap: () => setState(() => _currentIndex = 3),
+                        onTap: () => setState(() { _loadedTabs.add(3); _currentIndex = 3; }),
                       ),
                     ),
                     Expanded(
@@ -204,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         activeIcon: Icons.settings,
                         label: 'Impostazioni',
                         isActive: _currentIndex == 4,
-                        onTap: () => setState(() => _currentIndex = 4),
+                        onTap: () => setState(() { _loadedTabs.add(4); _currentIndex = 4; }),
                       ),
                     ),
                   ],
@@ -415,30 +425,6 @@ class _HomeContentState extends State<_HomeContent> {
 
         return CustomScrollView(
           slivers: [
-            // App Bar
-            SliverAppBar(
-              floating: true,
-              title: null,
-              toolbarHeight: 0,
-              actions: [
-                if (provider.isBackingUp)
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                else if (provider.isGoogleSignedIn)
-                  IconButton(
-                    icon: Icon(Icons.cloud_done, color: AppColors.success),
-                    onPressed: () => provider.backupToGoogleDrive(),
-                    tooltip: 'Backup sincronizzato',
-                  ),
-              ],
-            ),
-
             // Month Selector + Total
             SliverToBoxAdapter(
               child: _MonthSelector(provider: provider),
