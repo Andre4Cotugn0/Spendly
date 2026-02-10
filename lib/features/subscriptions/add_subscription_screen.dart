@@ -180,10 +180,15 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
               _nameController.text = s['name'] as String;
               _amountController.text = (s['amount'] as num).toStringAsFixed(2);
               final freq = s['frequency'] as String;
+              final suggestedCategoryId = s['category'] as String?;
               setState(() {
                 _frequency = SubscriptionFrequency.values.firstWhere(
                   (f) => f.name == freq,
                   orElse: () => SubscriptionFrequency.monthly,
+                );
+                _selectedCategoryId = _resolveSuggestedCategoryId(
+                  provider.categories,
+                  suggestedCategoryId,
                 );
                 _showSuggestions = false;
               });
@@ -209,6 +214,18 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         },
       ),
     ).animate().fadeIn(duration: 300.ms);
+  }
+
+  String? _resolveSuggestedCategoryId(List<Category> categories, String? suggestedId) {
+    if (categories.isEmpty) return null;
+    if (suggestedId != null) {
+      for (final category in categories) {
+        if (category.id == suggestedId) {
+          return category.id;
+        }
+      }
+    }
+    return categories.first.id;
   }
 
   Widget _buildNameInput() {

@@ -16,18 +16,20 @@ class CategoriesScreen extends StatelessWidget {
         final defaultCategories = provider.categories.where((c) => c.isDefault).toList();
         final customCategories = provider.categories.where((c) => !c.isDefault).toList();
 
-        return CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              title: const Text('Categorie'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => _showAddCategoryDialog(context, provider),
-                ),
-              ],
-            ),
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                title: const Text('Categorie'),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => _showAddCategoryDialog(context, provider),
+                  ),
+                ],
+              ),
 
             // Default Categories
             SliverToBoxAdapter(
@@ -133,10 +135,11 @@ class CategoriesScreen extends StatelessWidget {
                 ),
               ),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100),
+              ),
+            ],
+          ),
         );
       },
     );
