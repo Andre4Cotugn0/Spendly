@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Traccia Spese Rapide</string>
+	<string>Spendly</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>traccia_spese_rapide</string>
+	<string>Spendly</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,5 +45,27 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Google Sign-In Configuration -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Placeholder - needs to be replaced with actual REVERSED_CLIENT_ID from Google Console -->
+				<string>com.googleusercontent.apps.placeholder</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Query Schemes for Google Sign-In -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlegmail</string>
+		<string>googlemail</string>
+	</array>
+	<!-- Network Usage Description for debugging -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Spendly usa la rete locale per il debug e lo sviluppo con hot reload</string>
 </dict>
 </plist>

@@ -56,24 +56,48 @@ class ExpenseProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _widgetService.initialize();
-      await _notificationService.initialize();
+      // Carica categorie PRIMA di tutto
+      try {
+        _categories = await _db.getAllCategories();
+      } catch (e) {
+        debugPrint('Errore caricamento categorie: $e');
+        _error = 'Errore caricamento categorie: $e';
+      }
 
-      _categories = await _db.getAllCategories();
-      _expenses = await _db.getExpensesByMonth(_selectedYear, _selectedMonth);
-      _subscriptions = await _db.getAllSubscriptions();
-      _budgets = await _db.getBudgetsByMonth(_selectedYear, _selectedMonth);
-      _debts = await _db.getAllDebts();
+      // Carica gli altri dati
+      try {
+        _expenses = await _db.getExpensesByMonth(_selectedYear, _selectedMonth);
+        _subscriptions = await _db.getAllSubscriptions();
+        _budgets = await _db.getBudgetsByMonth(_selectedYear, _selectedMonth);
+        _debts = await _db.getAllDebts();
+      } catch (e) {
+        debugPrint('Errore caricamento dati principali: $e');
+      }
 
-      await _widgetService.updateWidget();
+      // Inizializza servizi (non bloccare se fallisce)
+      try {
+        await _widgetService.initialize();
+        await _widgetService.updateWidget();
+      } catch (e) {
+        debugPrint('Errore widget service: $e');
+      }
 
-      // Pianifica notifiche abbonamenti
-      await _notificationService.scheduleAllSubscriptionReminders(activeSubscriptions);
+      try {
+        await _notificationService.initialize();
+        await _notificationService.scheduleAllSubscriptionReminders(activeSubscriptions);
+      } catch (e) {
+        debugPrint('Errore notification service: $e');
+      }
 
-      // Login silenzioso Google
-      await _driveService.signInSilently();
-      if (_driveService.isSignedIn) {
-        _lastBackupDate = await _driveService.getLastBackupDate();
+      // Google Sign-In in un try-catch separato per non bloccare il resto
+      try {
+        await _driveService.signInSilently();
+        if (_driveService.isSignedIn) {
+          _lastBackupDate = await _driveService.getLastBackupDate();
+        }
+      } catch (e) {
+        debugPrint('Errore Google Drive sign in silenzioso: $e');
+        // Non è critico se fallisce il login silenzioso
       }
     } catch (e) {
       _error = 'Errore caricamento dati: $e';
@@ -492,7 +516,8 @@ class ExpenseProvider extends ChangeNotifier {
     } catch (e) {
       _error = 'Errore login Google: $e';
       notifyListeners();
-      return false;
+      // Rilancia l'eccezione per permettere gestione nell'UI
+      rethrow;
     }
   }
 

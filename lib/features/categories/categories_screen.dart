@@ -35,9 +35,12 @@ class CategoriesScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                 child: Text(
                   'Categorie Predefinite',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
               ),
             ),
@@ -64,9 +67,12 @@ class CategoriesScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
                   child: Text(
                     'Le Tue Categorie',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
                 ),
               ),
@@ -92,26 +98,34 @@ class CategoriesScreen extends StatelessWidget {
             if (customCategories.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(40),
+                  padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 40),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.add_circle_outline,
-                        size: 64,
+                        size: 56,
                         color: AppColors.textTertiary,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Nessuna categoria personalizzata',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textSecondary,
+                          decoration: TextDecoration.none,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Tocca + per aggiungerne una',
+                        'Tocca il pulsante + per aggiungerne una',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
+                          fontSize: 13,
                           color: AppColors.textTertiary,
+                          decoration: TextDecoration.none,
                         ),
                       ),
                     ],
@@ -130,7 +144,7 @@ class CategoriesScreen extends StatelessWidget {
 
   void _showAddCategoryDialog(BuildContext context, ExpenseProvider provider) {
     final nameController = TextEditingController();
-    Color selectedColor = AppColors.primary;
+    Color selectedColor = const Color(0xFFFF6B6B);
     
     final availableColors = [
       const Color(0xFFFF6B6B),
@@ -150,103 +164,159 @@ class CategoriesScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Nuova Categoria'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome categoria',
-                  hintText: 'Es: Abbonamenti',
-                ),
-                textCapitalization: TextCapitalization.sentences,
-                autofocus: true,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Colore',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: availableColors.map((color) {
-                  final isSelected = selectedColor == color;
-                  return GestureDetector(
-                    onTap: () => setState(() => selectedColor = color),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? Colors.white : Colors.transparent,
-                          width: 3,
+        builder: (context, setState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Nuova Categoria',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: color.withAlpha(128),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                )
-                              ]
-                            : null,
                       ),
-                      child: isSelected
-                          ? const Icon(Icons.check, color: Colors.white, size: 20)
-                          : null,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ],
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                        padding: EdgeInsets.zero,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Nome categoria',
+                          hintText: 'Es: Abbonamenti',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        textCapitalization: TextCapitalization.sentences,
+                        autofocus: true,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Colore',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: availableColors.map((color) {
+                          final isSelected = selectedColor == color;
+                          return GestureDetector(
+                            onTap: () => setState(() => selectedColor = color),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: isSelected
+                                    ? Border.all(
+                                        color: AppColors.textPrimary,
+                                        width: 3,
+                                      )
+                                    : null,
+                                boxShadow: isSelected
+                                    ? [BoxShadow(
+                                        color: color.withAlpha(128),
+                                        blurRadius: 8,
+                                      )]
+                                    : null,
+                              ),
+                              child: isSelected
+                                  ? const Icon(Icons.check, color: Colors.white, size: 24)
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 28),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              'Annulla',
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          FilledButton.tonal(
+                            onPressed: () async {
+                              final name = nameController.text.trim();
+                              if (name.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Inserisci un nome'),
+                                    backgroundColor: AppColors.error,
+                                  ),
+                                );
+                                return;
+                              }
+
+                              final category = Category(
+                                name: name,
+                                iconName: 'custom',
+                                color: selectedColor,
+                                isDefault: false,
+                              );
+
+                              final success = await provider.addCategory(category);
+                              if (success && context.mounted) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Categoria creata'),
+                                    backgroundColor: AppColors.success,
+                                  ),
+                                );
+                              } else if (!success && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(provider.error ?? 'Errore nella creazione'),
+                                    backgroundColor: AppColors.error,
+                                  ),
+                                );
+                              }
+                            },
+                            child: const Text('Crea'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Annulla'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final name = nameController.text.trim();
-                if (name.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Inserisci un nome')),
-                  );
-                  return;
-                }
-
-                final category = Category(
-                  name: name,
-                  iconName: 'custom',
-                  color: selectedColor,
-                  isDefault: false,
-                );
-
-                final success = await provider.addCategory(category);
-                if (success && context.mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Categoria creata'),
-                      backgroundColor: AppColors.success,
-                    ),
-                  );
-                }
-              },
-              child: const Text('Crea'),
-            ),
-          ],
         ),
       ),
     );
@@ -283,7 +353,7 @@ class CategoriesScreen extends StatelessWidget {
                 );
               }
             },
-            child: const Text('Elimina', style: TextStyle(color: AppColors.error)),
+            child: Text('Elimina', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -325,19 +395,22 @@ class _CategoryItem extends StatelessWidget {
                 children: [
                   Text(
                     category.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
+                      color: AppColors.textPrimary,
+                      decoration: TextDecoration.none,
                     ),
                   ),
                   if (!category.isDefault)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         'Personalizzata',
                         style: TextStyle(
                           color: AppColors.textTertiary,
                           fontSize: 12,
+                          decoration: TextDecoration.none,
                         ),
                       ),
                     ),

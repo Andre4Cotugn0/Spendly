@@ -56,7 +56,7 @@ class CategoryIconContainer extends StatelessWidget {
       child: Center(
         child: CategoryIcon(
           iconName: iconName,
-          color: iconColor ?? backgroundColor,
+          color: iconColor ?? Colors.white,
           size: iconSize,
         ),
       ),

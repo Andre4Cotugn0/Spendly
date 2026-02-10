@@ -6,11 +6,11 @@ import '../../core/utils/formatters.dart';
 import '../../data/models/expense.dart';
 import '../../data/models/category.dart';
 import '../../providers/expense_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../widgets/category_icon.dart';
 import '../add_expense/add_expense_screen.dart';
 import '../subscriptions/subscriptions_screen.dart';
 import '../statistics/statistics_screen.dart';
-import '../categories/categories_screen.dart';
 import '../settings/settings_screen.dart';
 import '../debts/debts_screen.dart';
 
@@ -35,7 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<ThemeProvider>();
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
         children: const [
@@ -43,76 +45,174 @@ class _HomeScreenState extends State<HomeScreen> {
           SubscriptionsScreen(),
           DebtsScreen(),
           StatisticsScreen(),
-          CategoriesScreen(),
           SettingsScreen(),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(),
-      floatingActionButton: _currentIndex == 0
-          ? FloatingActionButton(
-              onPressed: () => _openAddExpense(context),
-              child: const Icon(Icons.add, size: 28),
-            ).animate().scale(
-                  duration: 200.ms,
-                  curve: Curves.easeOutBack,
-                )
-          : null,
     );
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(
-          top: BorderSide(
-            color: AppColors.surfaceLight,
-            width: 1,
-          ),
-        ),
-      ),
+    return Material(
+      type: MaterialType.transparency,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          child: SizedBox(
+            height: 75,
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: 'Home',
-                isActive: _currentIndex == 0,
-                onTap: () => setState(() => _currentIndex = 0),
+              // Left bar - 2 items
+              Expanded(
+                child: Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(26),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: AppColors.primary.withAlpha(13),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.autorenew_outlined,
+                        activeIcon: Icons.autorenew,
+                        label: 'Abbonamenti',
+                        isActive: _currentIndex == 1,
+                        onTap: () => setState(() => _currentIndex = 1),
+                      ),
+                    ),
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.handshake_outlined,
+                        activeIcon: Icons.handshake,
+                        label: 'Debiti',
+                        isActive: _currentIndex == 2,
+                        onTap: () => setState(() => _currentIndex = 2),
+                      ),
+                    ),
+                  ],
+                ),
+                ),
               ),
-              _NavItem(
-                icon: Icons.autorenew_outlined,
-                activeIcon: Icons.autorenew,
-                label: 'Abbonamenti',
-                isActive: _currentIndex == 1,
-                onTap: () => setState(() => _currentIndex = 1),
-              ),
-              _NavItem(
-                icon: Icons.handshake_outlined,
-                activeIcon: Icons.handshake,
-                label: 'Debiti',
-                isActive: _currentIndex == 2,
-                onTap: () => setState(() => _currentIndex = 2),
-              ),
-              _NavItem(
-                icon: Icons.bar_chart_outlined,
-                activeIcon: Icons.bar_chart,
-                label: 'Statistiche',
-                isActive: _currentIndex == 3,
-                onTap: () => setState(() => _currentIndex = 3),
-              ),
-              _NavItem(
-                icon: Icons.settings_outlined,
-                activeIcon: Icons.settings,
-                label: 'Altro',
-                isActive: _currentIndex == 4,
-                onTap: () => setState(() => _currentIndex = 4),
+              // Central FAB
+              const SizedBox(width: 4),
+              Container(
+                width: 64,
+                height: 64,
+                margin: const EdgeInsets.only(bottom: 15),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withAlpha(77),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (_currentIndex == 0) {
+                        _openAddExpense(context);
+                      } else {
+                        setState(() => _currentIndex = 0);
+                      }
+                    },
+                    customBorder: const CircleBorder(),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (Widget child, Animation<double> animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: ScaleTransition(
+                            scale: Tween<double>(begin: 0.8, end: 1.0).animate(animation),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        _currentIndex == 0 ? Icons.add : Icons.home,
+                        key: ValueKey<bool>(_currentIndex == 0),
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ),
+              ).animate().scale(
+                    duration: 200.ms,
+                    curve: Curves.easeOutBack,
+                  ),
+              // Right bar - 2 items
+              const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(26),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                    BoxShadow(
+                      color: AppColors.primary.withAlpha(13),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.bar_chart_outlined,
+                        activeIcon: Icons.bar_chart,
+                        label: 'Statistiche',
+                        isActive: _currentIndex == 3,
+                        onTap: () => setState(() => _currentIndex = 3),
+                      ),
+                    ),
+                    Expanded(
+                      child: _NavItem(
+                        icon: Icons.settings_outlined,
+                        activeIcon: Icons.settings,
+                        label: 'Impostazioni',
+                        isActive: _currentIndex == 4,
+                        onTap: () => setState(() => _currentIndex = 4),
+                      ),
+                    ),
+                  ],
+                ),
+                ),
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -129,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _NavItem extends StatelessWidget {
+class _NavItem extends StatefulWidget {
   final IconData icon;
   final IconData activeIcon;
   final String label;
@@ -145,39 +245,128 @@ class _NavItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withAlpha(26) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              color: isActive ? AppColors.primary : AppColors.textTertiary,
-              size: 22,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                color: isActive ? AppColors.primary : AppColors.textTertiary,
-              ),
-            ),
-          ],
-        ),
-      ),
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
     );
   }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _playAnimation() {
+    _animationController.forward(from: 0.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (!widget.isActive) {
+          _playAnimation();
+          widget.onTap();
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.all(8),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: widget.isActive ? AppColors.primary.withAlpha(26) : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: _buildAnimatedIcon(),
+        ),
+      ).animate(target: widget.isActive ? 1 : 0).scaleXY(
+            begin: 1.0,
+            end: 1.08,
+            duration: 250.ms,
+            curve: Curves.easeOutBack,
+          ),
+    );
+  }
+
+  Widget _buildAnimatedIcon() {
+    final icon = widget.isActive ? widget.activeIcon : widget.icon;
+    final color = widget.isActive ? AppColors.primary : AppColors.textTertiary;
+
+    // Animazioni specifiche per ogni icona
+    if (widget.label == 'Abbonamenti' && icon == Icons.autorenew) {
+      // Rotazione completa 360°
+      return RotationTransition(
+        turns: _animationController,
+        child: Icon(icon, color: color, size: 28),
+      );
+    } else if (widget.label == 'Debiti' && icon == Icons.handshake) {
+      // Chiusura e apertura delle mani (oscillazione di scala)
+      return ScaleTransition(
+        scale: TweenSequence<double>([
+          TweenSequenceItem<double>(
+            tween: Tween<double>(begin: 1.0, end: 0.65),
+            weight: 50,
+          ),
+          TweenSequenceItem<double>(
+            tween: Tween<double>(begin: 0.65, end: 1.0),
+            weight: 50,
+          ),
+        ]).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+        ),
+        child: Icon(icon, color: color, size: 28),
+      );
+    } else if (widget.label == 'Statistiche' && (icon == Icons.bar_chart || icon == Icons.bar_chart_outlined)) {
+      // Le barre salgono/scendono senza spostare l'icona
+      return ScaleTransition(
+        alignment: Alignment.bottomCenter,
+        scale: TweenSequence<double>([
+          TweenSequenceItem<double>(
+            tween: Tween<double>(begin: 1.0, end: 1.18),
+            weight: 35,
+          ),
+          TweenSequenceItem<double>(
+            tween: Tween<double>(begin: 1.18, end: 0.92),
+            weight: 30,
+          ),
+          TweenSequenceItem<double>(
+            tween: Tween<double>(begin: 0.92, end: 1.0),
+            weight: 35,
+          ),
+        ]).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+        ),
+        child: Icon(icon, color: color, size: 28),
+      );
+    } else if (widget.label == 'Impostazioni' && icon == Icons.settings) {
+      // Rotazione 1.5 giri (540°)
+      return RotationTransition(
+        turns: Tween<double>(begin: 0, end: 1.5).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+        ),
+        child: Icon(icon, color: color, size: 28),
+      );
+    }
+
+    // Icona di default senza animazione
+    return Icon(icon, color: color, size: 28);
+  }
+
 }
 
 class _HomeContent extends StatefulWidget {
@@ -229,7 +418,8 @@ class _HomeContentState extends State<_HomeContent> {
             // App Bar
             SliverAppBar(
               floating: true,
-              title: const Text('Spendly'),
+              title: null,
+              toolbarHeight: 0,
               actions: [
                 if (provider.isBackingUp)
                   const Padding(
@@ -242,7 +432,7 @@ class _HomeContentState extends State<_HomeContent> {
                   )
                 else if (provider.isGoogleSignedIn)
                   IconButton(
-                    icon: const Icon(Icons.cloud_done, color: AppColors.success),
+                    icon: Icon(Icons.cloud_done, color: AppColors.success),
                     onPressed: () => provider.backupToGoogleDrive(),
                     tooltip: 'Backup sincronizzato',
                   ),
@@ -273,7 +463,7 @@ class _HomeContentState extends State<_HomeContent> {
                     decoration: InputDecoration(
                       hintText: 'Cerca spese...',
                       hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(150)),
-                      prefixIcon: const Icon(Icons.search, color: AppColors.textTertiary, size: 20),
+                      prefixIcon: Icon(Icons.search, color: AppColors.textTertiary, size: 20),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close, size: 18),
@@ -371,7 +561,7 @@ class _HomeContentState extends State<_HomeContent> {
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const Icon(Icons.edit, color: AppColors.primary),
+              leading: Icon(Icons.edit, color: AppColors.primary),
               title: const Text('Modifica'),
               onTap: () {
                 Navigator.pop(context);
@@ -384,7 +574,7 @@ class _HomeContentState extends State<_HomeContent> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.error),
+              leading: Icon(Icons.delete, color: AppColors.error),
               title: const Text('Elimina'),
               onTap: () async {
                 Navigator.pop(context);
@@ -400,7 +590,7 @@ class _HomeContentState extends State<_HomeContent> {
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Elimina', style: TextStyle(color: AppColors.error)),
+                        child: Text('Elimina', style: TextStyle(color: AppColors.error)),
                       ),
                     ],
                   ),
@@ -581,7 +771,7 @@ class _ExpenseItem extends StatelessWidget {
                   iconName: category?.iconName ?? 'other',
                   backgroundColor: category?.color ?? AppColors.textTertiary,
                 ),
-                const SizedBox(width: 16),
+                  const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -623,7 +813,7 @@ class _ExpenseItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       Formatters.relativeDate(expense.date),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.textTertiary,
                         fontSize: 12,
                       ),

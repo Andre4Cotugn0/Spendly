@@ -8,6 +8,7 @@ import 'providers/expense_provider.dart';
 import 'providers/theme_provider.dart';
 import 'features/home/home_screen.dart';
 import 'features/onboarding/onboarding_screen.dart';
+import 'widgets/theme_transition_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,10 +46,44 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
-            home: showOnboarding ? const OnboardingScreen() : const HomeScreen(),
+            home: _AppWithOverlay(
+              showOnboarding: showOnboarding,
+            ),
           );
         },
       ),
+    );
+  }
+}
+
+class _AppWithOverlay extends StatelessWidget {
+  final bool showOnboarding;
+
+  const _AppWithOverlay({
+    required this.showOnboarding,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Ascolta i cambiamenti del ThemeProvider
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        // Determina se il tema corrente è scuro
+        final brightness = Theme.of(context).brightness;
+        final isDark = brightness == Brightness.dark;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            showOnboarding ? const OnboardingScreen() : const HomeScreen(),
+            if (themeProvider.isChangingTheme)
+              ThemeTransitionOverlay(
+                isChanging: themeProvider.isChangingTheme,
+                isDarkTheme: isDark,
+              ),
+          ],
+        );
+      },
     );
   }
 }

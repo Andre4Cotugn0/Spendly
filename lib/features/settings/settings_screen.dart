@@ -5,9 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/budget.dart';
-import '../../data/services/export_service.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../categories/categories_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,52 +16,57 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ExpenseProvider>(
       builder: (context, provider, _) {
-        return CustomScrollView(
-          slivers: [
-            const SliverAppBar(
-              floating: true,
-              title: Text('Impostazioni'),
-            ),
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, _) {
+            return CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  title: const Text('Impostazioni'),
+                  backgroundColor: AppColors.background,
+                ),
 
-            // Theme Section
-            SliverToBoxAdapter(
-              child: _buildThemeSection(context),
-            ),
+                // Theme Section
+                SliverToBoxAdapter(
+                  child: _buildThemeSection(context),
+                ),
 
-            // Budget Section
-            SliverToBoxAdapter(
-              child: _buildBudgetSection(context, provider),
-            ),
+                // Google Account Section
+                SliverToBoxAdapter(
+                  child: _buildGoogleSection(context, provider),
+                ),
 
-            // Notifications Section
-            SliverToBoxAdapter(
-              child: _buildNotificationsSection(context, provider),
-            ),
+                // Backup Section
+                SliverToBoxAdapter(
+                  child: _buildBackupSection(context, provider),
+                ),
 
-            // Export Section
-            SliverToBoxAdapter(
-              child: _buildExportSection(context, provider),
-            ),
+                // Budget Section
+                SliverToBoxAdapter(
+                  child: _buildBudgetSection(context, provider),
+                ),
 
-            // Google Account Section
-            SliverToBoxAdapter(
-              child: _buildGoogleSection(context, provider),
-            ),
+                // Categories Section
+                SliverToBoxAdapter(
+                  child: _buildCategoriesSection(context),
+                ),
 
-            // Backup Section
-            SliverToBoxAdapter(
-              child: _buildBackupSection(context, provider),
-            ),
+                // Notifications Section
+                SliverToBoxAdapter(
+                  child: _buildNotificationsSection(context, provider),
+                ),
 
-            // App Info
-            SliverToBoxAdapter(
-              child: _buildAppInfo(context),
-            ),
+                // App Info
+                SliverToBoxAdapter(
+                  child: _buildAppInfo(context),
+                ),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: 100),
+                ),
+              ],
+            );
+          }
         );
       },
     );
@@ -82,9 +87,12 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
               'Budget Mensile',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           ListTile(
@@ -94,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
                 color: AppColors.primary.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.account_balance_wallet, color: AppColors.primary),
+              child: Icon(Icons.account_balance_wallet, color: AppColors.primary, size: 20),
             ),
             title: const Text('Budget globale'),
             subtitle: Text(
@@ -125,7 +133,7 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Speso: ${Formatters.currency(spent)}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                           Text(
                             'Rimanente: ${Formatters.currency(globalBudget.remaining(spent))}',
@@ -151,7 +159,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 4),
         ],
       ),
-    ).animate().fadeIn(duration: 300.ms);
+    ).animate().fadeIn(delay: 150.ms, duration: 300.ms);
   }
 
   Widget _buildThemeSection(BuildContext context) {
@@ -170,9 +178,12 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                 child: Text(
                   'Aspetto',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
               ),
               ...[(ThemeMode.system, 'Sistema', Icons.brightness_auto_outlined, 'Segue il tema del dispositivo'),
@@ -195,7 +206,7 @@ class SettingsScreen extends StatelessWidget {
                   title: Text(label),
                   subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
                   trailing: isSelected
-                      ? const Icon(Icons.check_circle, color: AppColors.primary, size: 20)
+                      ? Icon(Icons.check_circle, color: AppColors.primary, size: 20)
                       : null,
                   onTap: () => themeProvider.setThemeMode(mode),
                 );
@@ -206,6 +217,50 @@ class SettingsScreen extends StatelessWidget {
         ).animate().fadeIn(duration: 300.ms);
       },
     );
+  }
+
+  Widget _buildCategoriesSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Text(
+              'Categorie',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withAlpha(26),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.category_outlined, color: AppColors.secondary, size: 20),
+            ),
+            title: const Text('Gestisci categorie'),
+            subtitle: const Text('Aggiungi o modifica le categorie personalizzate'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    ).animate().fadeIn(delay: 200.ms, duration: 300.ms);
   }
 
   Widget _buildNotificationsSection(BuildContext context, ExpenseProvider provider) {
@@ -222,9 +277,12 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
               'Notifiche',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           FutureBuilder<bool>(
@@ -235,10 +293,10 @@ class SettingsScreen extends StatelessWidget {
                 secondary: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
+                    color: AppColors.warning.withAlpha(26),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.notifications_active_outlined),
+                  child: Icon(Icons.notifications_active_outlined, color: AppColors.warning, size: 20),
                 ),
                 title: const Text('Promemoria giornaliero'),
                 subtitle: const Text('Ricorda di registrare le spese alle 20:00'),
@@ -247,16 +305,17 @@ class SettingsScreen extends StatelessWidget {
                   await provider.setDailyReminder(v);
                 },
                 activeTrackColor: AppColors.primary,
+                activeThumbColor: Colors.white,
               );
             },
           ),
           const SizedBox(height: 8),
         ],
       ),
-    ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
+    ).animate().fadeIn(delay: 250.ms, duration: 300.ms);
   }
 
-  Widget _buildExportSection(BuildContext context, ExpenseProvider provider) {
+  Widget _buildGoogleSection(BuildContext context, ExpenseProvider provider) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
@@ -269,62 +328,13 @@ class SettingsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
-              'Esportazione',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-          ),
-          ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.file_download_outlined),
-            ),
-            title: const Text('Esporta spese in CSV'),
-            subtitle: const Text('Condividi le spese del mese corrente'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _exportExpenses(context, provider),
-          ),
-          ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.file_download_outlined),
-            ),
-            title: const Text('Esporta abbonamenti in CSV'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _exportSubscriptions(context, provider),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    ).animate().fadeIn(delay: 150.ms, duration: 300.ms);
-  }
-
-  Widget _buildGoogleSection(BuildContext context, ExpenseProvider provider) {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-            child: Text(
               'Account Google',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           if (provider.isGoogleSignedIn) ...[
@@ -346,7 +356,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.logout, color: AppColors.error),
+              leading: Icon(Icons.logout, color: AppColors.error),
               title: const Text('Disconnetti'),
               onTap: () => _confirmSignOut(context, provider),
             ),
@@ -363,6 +373,9 @@ class SettingsScreen extends StatelessWidget {
               title: const Text('Non connesso'),
               subtitle: const Text('Accedi per attivare il backup automatico'),
             ),
+            // Avviso configurazione iOS
+            // RIMOSSO: alert su iOS
+
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: SizedBox(
@@ -377,12 +390,12 @@ class SettingsScreen extends StatelessWidget {
           ],
         ],
       ),
-    ).animate().fadeIn(duration: 300.ms);
+    ).animate().fadeIn(delay: 50.ms, duration: 300.ms);
   }
 
   Widget _buildBackupSection(BuildContext context, ExpenseProvider provider) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
@@ -394,9 +407,12 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
               'Backup & Ripristino',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           ListTile(
@@ -483,7 +499,7 @@ class SettingsScreen extends StatelessWidget {
 
   Widget _buildAppInfo(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
@@ -495,9 +511,12 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
             child: Text(
               'Informazioni',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
           const ListTile(
@@ -527,23 +546,57 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 8),
         ],
       ),
-    ).animate().fadeIn(delay: 200.ms, duration: 300.ms);
+    ).animate().fadeIn(delay: 350.ms, duration: 300.ms);
   }
 
   void _signInWithGoogle(BuildContext context, ExpenseProvider provider) async {
-    final success = await provider.signInGoogle();
-    if (success && context.mounted) {
+    try {
+      final success = await provider.signInGoogle();
+      if (!context.mounted) return;
+      
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Accesso effettuato! Backup automatico attivo.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Accesso annullato'),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      
+      String errorMsg = 'Errore durante l\'accesso';
+      Duration duration = const Duration(seconds: 4);
+      
+      final errorStr = e.toString().toLowerCase();
+      
+      // Su iOS, se manca la configurazione Google Sign-In
+      if (errorStr.contains('idtokenrequested') || 
+          errorStr.contains('platformexception') ||
+          errorStr.contains('sign_in_failed') ||
+          errorStr.contains('placeholder') ||
+          errorStr.contains('no matching client found')) {
+        errorMsg = 'Google Sign-In non configurato per iOS.\n'
+                   'Consulta GOOGLE_SIGNIN_SETUP.md per le istruzioni.';
+        duration = const Duration(seconds: 6);
+      } else if (errorStr.contains('network') || errorStr.contains('connection')) {
+        errorMsg = 'Errore di connessione. Verifica la tua rete.';
+      } else if (errorStr.contains('canceled') || errorStr.contains('cancelled')) {
+        errorMsg = 'Login annullato';
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Accesso effettuato! Backup automatico attivo.'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    } else if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Errore durante l\'accesso'),
+        SnackBar(
+          content: Text(errorMsg),
           backgroundColor: AppColors.error,
+          duration: duration,
         ),
       );
     }
@@ -568,7 +621,7 @@ class SettingsScreen extends StatelessWidget {
               Navigator.pop(context);
               provider.signOutGoogle();
             },
-            child: const Text('Disconnetti', style: TextStyle(color: AppColors.error)),
+            child: Text('Disconnetti', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -634,7 +687,7 @@ class SettingsScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Imposta un limite di spesa mensile. Riceverai una notifica quando lo superi.',
               style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
@@ -658,7 +711,7 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(ctx);
                 provider.deleteBudget(current.id);
               },
-              child: const Text('Rimuovi', style: TextStyle(color: AppColors.error)),
+              child: Text('Rimuovi', style: TextStyle(color: AppColors.error)),
             ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -683,36 +736,5 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _exportExpenses(BuildContext context, ExpenseProvider provider) async {
-    try {
-      final now = DateTime.now();
-      final startDate = DateTime(now.year, now.month, 1);
-      final endDate = DateTime(now.year, now.month + 1, 0);
-      
-      await ExportService.instance.exportAndShareCsv(
-        startDate: startDate,
-        endDate: endDate,
-      );
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore esportazione: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    }
-  }
-
-  void _exportSubscriptions(BuildContext context, ExpenseProvider provider) async {
-    try {
-      await ExportService.instance.exportSubscriptionsCsv();
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Errore esportazione: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    }
   }
 }

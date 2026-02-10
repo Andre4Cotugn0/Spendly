@@ -187,7 +187,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 40),
           Text(
             page.title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
@@ -197,7 +197,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 16),
           Text(
             page.subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               color: AppColors.textSecondary,
               height: 1.5,

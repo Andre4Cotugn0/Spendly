@@ -26,7 +26,15 @@ class NotificationService {
     tz.initializeTimeZones();
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidSettings);
+    const iosSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
 
     await _plugin.initialize(
       settings: initSettings,
@@ -52,14 +60,19 @@ class NotificationService {
         title: 'Pagamento in arrivo 💳',
         body: '${sub.name}: €${sub.amount.toStringAsFixed(2)} ${sub.frequency == SubscriptionFrequency.yearly ? "annuale" : sub.frequency == SubscriptionFrequency.monthly ? "mensile" : "settimanale"} tra ${sub.reminderDaysBefore} ${sub.reminderDaysBefore == 1 ? "giorno" : "giorni"}',
         scheduledDate: tz.TZDateTime.from(reminderDate, tz.local),
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
+        notificationDetails: NotificationDetails(
+          android: const AndroidNotificationDetails(
             'subscription_reminders',
             'Promemoria Abbonamenti',
             channelDescription: 'Notifiche per pagamenti abbonamenti in scadenza',
             importance: Importance.high,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -139,6 +152,11 @@ class NotificationService {
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
             icon: '@mipmap/ic_launcher',
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

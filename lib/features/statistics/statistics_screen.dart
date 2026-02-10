@@ -7,6 +7,7 @@ import '../../core/utils/formatters.dart';
 import '../../data/models/category.dart';
 import '../../data/models/expense.dart';
 import '../../providers/expense_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../../widgets/category_icon.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -21,6 +22,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch theme provider to rebuild when theme changes
+    context.watch<ThemeProvider>();
+    
     return Consumer<ExpenseProvider>(
       builder: (context, provider, _) {
         return CustomScrollView(
@@ -124,7 +128,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               Center(
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       'Totale',
                       style: TextStyle(
                         color: AppColors.textSecondary,
@@ -267,7 +271,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
                           return BarTooltipItem(
                             Formatters.currency(rod.toY),
-                            const TextStyle(
+                            TextStyle(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
@@ -290,7 +294,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
                                 day.substring(8, 10),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: AppColors.textTertiary,
                                   fontSize: 10,
                                 ),
@@ -359,7 +363,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.trending_up, color: AppColors.primary, size: 20),
+                  Icon(Icons.trending_up, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Text('Top 5 Spese', style: Theme.of(context).textTheme.titleLarge),
                 ],
@@ -381,7 +385,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         child: Center(
                           child: Text(
                             '${e.key + 1}',
-                            style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13),
+                            style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600, fontSize: 13),
                           ),
                         ),
                       ),
@@ -405,14 +409,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             ),
                             Text(
                               Formatters.relativeDate(expense.date),
-                              style: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
+                              style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
                             ),
                           ],
                         ),
                       ),
                       Text(
                         Formatters.currency(expense.amount),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error),
+                        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.error),
                       ),
                     ],
                   ),
@@ -450,7 +454,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.show_chart, color: AppColors.secondary, size: 20),
+                  Icon(Icons.show_chart, color: AppColors.secondary, size: 20),
                   const SizedBox(width: 8),
                   Text('Trend Mensile', style: Theme.of(context).textTheme.titleLarge),
                 ],
@@ -470,7 +474,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         getTooltipItem: (group, groupIndex, rod, rodIndex) {
                           return BarTooltipItem(
                             Formatters.currency(rod.toY),
-                            const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12),
+                            TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12),
                           );
                         },
                       ),
@@ -488,7 +492,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               padding: const EdgeInsets.only(top: 8),
                               child: Text(
                                 monthLabels[month],
-                                style: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
+                                style: TextStyle(color: AppColors.textTertiary, fontSize: 11),
                               ),
                             );
                           },
@@ -545,7 +549,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           const SizedBox(height: 16),
           Text(
             message,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: TextStyle(color: AppColors.textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -661,7 +665,7 @@ class _CategoryBreakdownItem extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${(percentage * 100).toStringAsFixed(1)}%',
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textTertiary,
                   fontSize: 12,
                 ),

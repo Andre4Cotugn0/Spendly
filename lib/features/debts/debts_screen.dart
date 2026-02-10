@@ -170,19 +170,19 @@ class DebtsScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               '${Formatters.currency(debt.amount)} - ${debt.type.label}',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
             if (debt.amountPaid > 0 && !debt.isSettled) ...[
               const SizedBox(height: 4),
               Text(
                 'Saldato: ${Formatters.currency(debt.amountPaid)} / ${Formatters.currency(debt.amount)}',
-                style: const TextStyle(color: AppColors.textTertiary, fontSize: 13),
+                style: TextStyle(color: AppColors.textTertiary, fontSize: 13),
               ),
             ],
             const SizedBox(height: 20),
             if (!debt.isSettled) ...[
               ListTile(
-                leading: const Icon(Icons.edit, color: AppColors.primary),
+                leading: Icon(Icons.edit, color: AppColors.primary),
                 title: const Text('Modifica'),
                 onTap: () {
                   Navigator.pop(context);
@@ -204,7 +204,7 @@ class DebtsScreen extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.check_circle, color: AppColors.success),
+                leading: Icon(Icons.check_circle, color: AppColors.success),
                 title: const Text('Segna come saldato'),
                 onTap: () {
                   Navigator.pop(context);
@@ -213,7 +213,7 @@ class DebtsScreen extends StatelessWidget {
               ),
             ] else ...[
               ListTile(
-                leading: const Icon(Icons.undo, color: AppColors.warning),
+                leading: Icon(Icons.undo, color: AppColors.warning),
                 title: const Text('Riapri debito'),
                 onTap: () {
                   Navigator.pop(context);
@@ -223,7 +223,7 @@ class DebtsScreen extends StatelessWidget {
               ),
             ],
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              leading: Icon(Icons.delete_outline, color: AppColors.error),
               title: const Text('Elimina'),
               onTap: () => _confirmDelete(context, debt, provider),
             ),
@@ -247,7 +247,7 @@ class DebtsScreen extends StatelessWidget {
           children: [
             Text(
               'Rimanente: ${Formatters.currency(debt.remaining)}',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -308,7 +308,7 @@ class DebtsScreen extends StatelessWidget {
               provider.deleteDebt(debt.id);
             },
             child:
-                const Text('Elimina', style: TextStyle(color: AppColors.error)),
+                Text('Elimina', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -386,12 +386,12 @@ class _SummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white70, size: 20),
+          Icon(icon, color: AppColors.textOnAccent, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              style: TextStyle(color: AppColors.textOnAccent, fontSize: 14),
             ),
           ),
           Text(
@@ -467,8 +467,6 @@ class _DebtItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOverdue = debt.isOverdue;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       child: Material(
@@ -498,12 +496,10 @@ class _DebtItem extends StatelessWidget {
                           debt.personName.isNotEmpty
                               ? debt.personName[0].toUpperCase()
                               : '?',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: debt.type == DebtType.iOwe
-                                ? AppColors.error
-                                : AppColors.success,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -534,10 +530,8 @@ class _DebtItem extends StatelessWidget {
                                 ),
                                 child: Text(
                                   debt.type.label,
-                                  style: TextStyle(
-                                    color: debt.type == DebtType.iOwe
-                                        ? AppColors.error
-                                        : AppColors.success,
+                                  style: const TextStyle(
+                                    color: Colors.white,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -548,21 +542,15 @@ class _DebtItem extends StatelessWidget {
                                 Icon(
                                   Icons.schedule,
                                   size: 12,
-                                  color: isOverdue
-                                      ? AppColors.error
-                                      : AppColors.textTertiary,
+                                  color: Colors.white,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   _formatDueDate(debt),
-                                  style: TextStyle(
-                                    color: isOverdue
-                                        ? AppColors.error
-                                        : AppColors.textTertiary,
+                                  style: const TextStyle(
+                                    color: Colors.white,
                                     fontSize: 12,
-                                    fontWeight: isOverdue
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
@@ -572,7 +560,7 @@ class _DebtItem extends StatelessWidget {
                                 Flexible(
                                   child: Text(
                                     debt.description!,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: AppColors.textTertiary,
                                       fontSize: 11,
                                     ),
@@ -590,19 +578,17 @@ class _DebtItem extends StatelessWidget {
                       children: [
                         Text(
                           Formatters.currency(debt.amount),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: debt.type == DebtType.iOwe
-                                ? AppColors.error
-                                : AppColors.success,
+                            color: Colors.white,
                           ),
                         ),
                         if (debt.amountPaid > 0 && !debt.isSettled) ...[
                           const SizedBox(height: 2),
                           Text(
                             '-${Formatters.currencyCompact(debt.amountPaid)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.textTertiary,
                               fontSize: 11,
                             ),

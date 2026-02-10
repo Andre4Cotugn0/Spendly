@@ -130,7 +130,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.textSecondary,
@@ -179,7 +179,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 '€',
                 style: TextStyle(
                   fontSize: 36,
@@ -195,7 +195,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     focusNode: _amountFocusNode,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 56,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
@@ -394,7 +394,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         ),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
           color: AppColors.textPrimary,
         ),
@@ -498,13 +498,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: Colors.white,
               surface: AppColors.surface,
               onSurface: AppColors.textPrimary,
             ),
-            dialogTheme: const DialogThemeData(
+            dialogTheme: DialogThemeData(
               backgroundColor: AppColors.surface,
             ),
           ),

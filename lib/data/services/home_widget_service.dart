@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
+import 'dart:io' show Platform;
 import '../database/database_helper.dart';
 
 /// Servizio per gestire il widget della home screen Android
@@ -22,6 +23,9 @@ class HomeWidgetService {
 
   /// Aggiorna i dati del widget con il totale del mese corrente
   Future<void> updateWidget() async {
+    // Il widget è supportato solo su Android
+    if (!Platform.isAndroid) return;
+    
     try {
       final now = DateTime.now();
       final total = await DatabaseHelper.instance.getTotalByMonth(now.year, now.month);

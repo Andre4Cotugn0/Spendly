@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
@@ -60,6 +61,11 @@ class GoogleDriveService {
   /// Login con Google
   Future<bool> signIn() async {
     try {
+      // Su iOS, controlla se la configurazione è stata fatta
+      if (!kIsWeb && Platform.isIOS) {
+        debugPrint('Tentativo di login Google su iOS - verifica configurazione Info.plist');
+      }
+      
       _currentUser = await _googleSignIn.signIn();
       if (_currentUser != null) {
         await _initDriveApi();
@@ -68,7 +74,23 @@ class GoogleDriveService {
       return false;
     } catch (e) {
       debugPrint('Errore sign in: $e');
-      return false;
+      debugPrint('Stack trace: ${StackTrace.current}');
+      
+      // Su iOS, fornisci un messaggio più chiaro
+      if (!kIsWeb && Platform.isIOS) {
+        if (e.toString().contains('DEVELOPER_ERROR') || 
+            e.toString().contains('missing') ||
+            e.toString().contains('invalid')) {
+          throw Exception(
+            'Google Sign-In non configurato correttamente per iOS. '
+            'Verifica che il REVERSED_CLIENT_ID sia configurato in Info.plist. '
+            'Consulta GOOGLE_SIGNIN_SETUP.md per le istruzioni.'
+          );
+        }
+      }
+      
+      // Rilancia l'eccezione originale
+      rethrow;
     }
   }
 

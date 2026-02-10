@@ -157,7 +157,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.textSecondary,
@@ -223,7 +223,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         decoration: InputDecoration(
           hintText: 'Es: Netflix, Spotify...',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
-          prefixIcon: const Icon(Icons.subscriptions_outlined, color: AppColors.textTertiary),
+          prefixIcon: Icon(Icons.subscriptions_outlined, color: AppColors.textTertiary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         ),
@@ -247,7 +247,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         decoration: InputDecoration(
           hintText: '0.00',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
-          prefixIcon: const Padding(
+          prefixIcon: Padding(
             padding: EdgeInsets.all(14),
             child: Text('€', style: TextStyle(fontSize: 20, color: AppColors.textSecondary)),
           ),
@@ -379,14 +379,14 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, color: AppColors.textTertiary, size: 20),
+            Icon(Icons.calendar_today, color: AppColors.textTertiary, size: 20),
             const SizedBox(width: 12),
             Text(
               '${_startDate.day}/${_startDate.month}/${_startDate.year}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const Spacer(),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
         ),
       ),
@@ -404,7 +404,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.notifications_outlined, color: AppColors.primary),
+              Icon(Icons.notifications_outlined, color: AppColors.primary),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -423,13 +423,13 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
             const Divider(height: 24),
             Row(
               children: [
-                const Text('Avvisa ', style: TextStyle(color: AppColors.textSecondary)),
+                Text('Avvisa ', style: TextStyle(color: AppColors.textSecondary)),
                 _buildDayChip(1),
                 const SizedBox(width: 8),
                 _buildDayChip(2),
                 const SizedBox(width: 8),
                 _buildDayChip(3),
-                const Text(
+                Text(
                   ' giorni prima',
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
@@ -476,7 +476,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         decoration: InputDecoration(
           hintText: 'Aggiungi una nota...',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
-          prefixIcon: const Icon(Icons.edit_note, color: AppColors.textTertiary),
+          prefixIcon: Icon(Icons.edit_note, color: AppColors.textTertiary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         ),
@@ -565,12 +565,12 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               surface: AppColors.surface,
               onSurface: AppColors.textPrimary,
             ),
-            dialogTheme: const DialogThemeData(backgroundColor: AppColors.surface),
+            dialogTheme: DialogThemeData(backgroundColor: AppColors.surface),
           ),
           child: child!,
         );

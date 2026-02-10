@@ -110,7 +110,7 @@ class SubscriptionsScreen extends StatelessWidget {
                         ),
                         child: Text(
                           '${inactive.length}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.textTertiary,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
@@ -188,11 +188,11 @@ class SubscriptionsScreen extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               '${Formatters.currency(sub.amount)} ${sub.frequency.shortLabel}',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
             ListTile(
-              leading: const Icon(Icons.edit, color: AppColors.primary),
+              leading: Icon(Icons.edit, color: AppColors.primary),
               title: const Text('Modifica'),
               onTap: () {
                 Navigator.pop(context);
@@ -216,7 +216,7 @@ class SubscriptionsScreen extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_outline, color: AppColors.error),
+              leading: Icon(Icons.delete_outline, color: AppColors.error),
               title: const Text('Elimina'),
               onTap: () => _confirmDelete(context, sub, provider),
             ),
@@ -241,7 +241,7 @@ class SubscriptionsScreen extends StatelessWidget {
               Navigator.pop(ctx);
               provider.deleteSubscription(sub.id);
             },
-            child: const Text('Elimina', style: TextStyle(color: AppColors.error)),
+            child: Text('Elimina', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -315,12 +315,12 @@ class _SummaryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.white70, size: 20),
+          Icon(icon, color: AppColors.textOnAccent, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              style: TextStyle(color: AppColors.textOnAccent, fontSize: 14),
             ),
           ),
           Text(
@@ -393,14 +393,14 @@ class _SubscriptionItem extends StatelessWidget {
                             ),
                             child: Text(
                               subscription.frequency.label,
-                              style: const TextStyle(
-                                color: AppColors.textTertiary,
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
                                 fontSize: 11,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(Icons.schedule, size: 12, color: AppColors.textTertiary),
+                          Icon(Icons.schedule, size: 12, color: AppColors.textSecondary),
                           const SizedBox(width: 4),
                           Text(
                             daysUntil == 0
@@ -409,7 +409,7 @@ class _SubscriptionItem extends StatelessWidget {
                                     ? 'Domani'
                                     : 'tra $daysUntil giorni',
                             style: TextStyle(
-                              color: daysUntil <= 3 ? AppColors.warning : AppColors.textTertiary,
+                              color: AppColors.textSecondary,
                               fontSize: 12,
                             ),
                           ),
@@ -431,8 +431,8 @@ class _SubscriptionItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '~${Formatters.currencyCompact(subscription.monthlyCost)}/mese',
-                      style: const TextStyle(
-                        color: AppColors.textTertiary,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
                         fontSize: 11,
                       ),
                     ),

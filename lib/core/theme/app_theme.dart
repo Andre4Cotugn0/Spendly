@@ -19,17 +19,32 @@ class AppColors {
   static const Color secondary = AppSeeds.secondary;
   static const Color secondaryLight = Color(0xFF5CEBFF);
 
-  // defaults (dark)
-  static const Color background = Color(0xFF0F0F0F);
-  static const Color surface = Color(0xFF1A1A2E);
-  static const Color surfaceLight = Color(0xFF25253D);
-  static const Color surfaceLighter = Color(0xFF2F2F4A);
-  static const Color textPrimary = Color(0xFFF2F2F7);
-  static const Color textSecondary = Color(0xFFA5A5BF);
-  static const Color textTertiary = Color(0xFF63637A);
+  static ThemeMode _themeMode = ThemeMode.system;
+
+  static void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+  }
+
+  static bool get _isDark {
+    if (_themeMode == ThemeMode.system) {
+      return WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+    }
+    return _themeMode == ThemeMode.dark;
+  }
+
+  static Color get background => _isDark ? const Color(0xFF0F0F0F) : const Color(0xFFF5F6FA);
+  static Color get surface => _isDark ? const Color(0xFF1A1A2E) : Colors.white;
+  static Color get surfaceLight => _isDark ? const Color(0xFF25253D) : const Color(0xFFEDEEF3);
+  static Color get surfaceLighter => _isDark ? const Color(0xFF2F2F4A) : const Color(0xFFE3E4EC);
+  static Color get textPrimary => _isDark ? const Color(0xFFF2F2F7) : const Color(0xFF1C1C1E);
+  static Color get textSecondary => _isDark ? const Color(0xFFA5A5BF) : const Color(0xFF6E6E80);
+  static Color get textTertiary => _isDark ? const Color(0xFF63637A) : const Color(0xFF9D9DAF);
   static const Color success = Color(0xFF34C759);
   static const Color warning = Color(0xFFFFBF40);
   static const Color error = Color(0xFFFF453A);
+
+  /// Testo per sfondo colorato - bianco sempre per gradient e sfondi accesi
+  static const Color textOnAccent = Colors.white;
 
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [AppSeeds.primary, AppSeeds.secondary],
@@ -90,17 +105,17 @@ class AppTheme {
 
     final textTheme = GoogleFonts.interTextTheme(
       TextTheme(
-        displayLarge:  TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: text1, letterSpacing: -0.5),
-        displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: text1, letterSpacing: -0.5),
-        displaySmall:  TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: text1),
-        headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: text1),
-        headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: text1),
-        titleLarge:    TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: text1),
-        titleMedium:   TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: text1),
-        bodyLarge:     TextStyle(fontSize: 16, color: text1),
-        bodyMedium:    TextStyle(fontSize: 14, color: text2),
-        bodySmall:     TextStyle(fontSize: 12, color: text3),
-        labelLarge:    TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: text1),
+        displayLarge:  TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: text1, letterSpacing: -0.5, decoration: TextDecoration.none),
+        displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: text1, letterSpacing: -0.5, decoration: TextDecoration.none),
+        displaySmall:  TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: text1, decoration: TextDecoration.none),
+        headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: text1, decoration: TextDecoration.none),
+        headlineSmall: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: text1, decoration: TextDecoration.none),
+        titleLarge:    TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: text1, decoration: TextDecoration.none),
+        titleMedium:   TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: text1, decoration: TextDecoration.none),
+        bodyLarge:     TextStyle(fontSize: 16, color: text1, decoration: TextDecoration.none),
+        bodyMedium:    TextStyle(fontSize: 14, color: text2, decoration: TextDecoration.none),
+        bodySmall:     TextStyle(fontSize: 12, color: text3, decoration: TextDecoration.none),
+        labelLarge:    TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: text1, decoration: TextDecoration.none),
       ),
     );
 

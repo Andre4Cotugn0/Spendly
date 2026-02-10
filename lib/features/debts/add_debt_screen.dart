@@ -134,7 +134,7 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.textSecondary,
@@ -210,7 +210,7 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
           hintText: 'Es: Marco, Anna...',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
           prefixIcon:
-              const Icon(Icons.person_outline, color: AppColors.textTertiary),
+              Icon(Icons.person_outline, color: AppColors.textTertiary),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -235,11 +235,11 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
         decoration: InputDecoration(
           hintText: '0.00',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
-          prefixIcon: const Padding(
+            prefixIcon: Padding(
             padding: EdgeInsets.all(14),
             child: Text('€',
-                style: TextStyle(
-                    fontSize: 20, color: AppColors.textSecondary)),
+              style: TextStyle(
+                fontSize: 20, color: AppColors.textSecondary)),
           ),
           border: InputBorder.none,
           contentPadding:
@@ -270,7 +270,7 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, color: AppColors.textTertiary, size: 20),
+            Icon(Icons.calendar_today, color: AppColors.textTertiary, size: 20),
             const SizedBox(width: 12),
             Text(
               Formatters.date(_date),
@@ -280,7 +280,7 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
               ),
             ),
             const Spacer(),
-            const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+            Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
         ),
       ),
@@ -317,10 +317,10 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
             if (_dueDate != null)
               GestureDetector(
                 onTap: () => setState(() => _dueDate = null),
-                child: const Icon(Icons.close, color: AppColors.textTertiary, size: 20),
+                child: Icon(Icons.close, color: AppColors.textTertiary, size: 20),
               )
             else
-              const Icon(Icons.chevron_right, color: AppColors.textTertiary),
+              Icon(Icons.chevron_right, color: AppColors.textTertiary),
           ],
         ),
       ),
@@ -340,7 +340,7 @@ class _AddDebtScreenState extends State<AddDebtScreen> {
           hintText: 'Motivo del debito...',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
           prefixIcon:
-              const Icon(Icons.notes, color: AppColors.textTertiary),
+              Icon(Icons.notes, color: AppColors.textTertiary),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 16, horizontal: 16),

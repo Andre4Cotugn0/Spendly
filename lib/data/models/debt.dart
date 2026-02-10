@@ -62,7 +62,7 @@ class Debt {
 
   /// Giorni alla scadenza (negativo se scaduto)
   int? get daysUntilDue =>
-      dueDate != null ? dueDate!.difference(DateTime.now()).inDays : null;
+      dueDate?.difference(DateTime.now()).inDays;
 
   Map<String, dynamic> toMap() {
     return {
