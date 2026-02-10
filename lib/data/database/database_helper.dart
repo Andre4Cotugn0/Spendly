@@ -4,6 +4,7 @@ import '../models/expense.dart';
 import '../models/category.dart';
 import '../models/subscription.dart';
 import '../models/budget.dart';
+import '../models/debt.dart';
 import '../constants/default_categories.dart';
 
 class DatabaseHelper {
@@ -24,7 +25,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -94,6 +95,21 @@ class DatabaseHelper {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE debts (
+        id TEXT PRIMARY KEY,
+        person_name TEXT NOT NULL,
+        amount REAL NOT NULL,
+        amount_paid REAL NOT NULL DEFAULT 0,
+        type TEXT NOT NULL,
+        description TEXT,
+        date TEXT NOT NULL,
+        due_date TEXT,
+        is_settled INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
     for (final category in DefaultCategories.categories) {
       await db.insert('categories', category.toMap());
     }
@@ -138,6 +154,23 @@ class DatabaseHelper {
           category_id TEXT NOT NULL,
           keyword TEXT NOT NULL,
           FOREIGN KEY (category_id) REFERENCES categories (id)
+        )
+      ''');
+    }
+
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS debts (
+          id TEXT PRIMARY KEY,
+          person_name TEXT NOT NULL,
+          amount REAL NOT NULL,
+          amount_paid REAL NOT NULL DEFAULT 0,
+          type TEXT NOT NULL,
+          description TEXT,
+          date TEXT NOT NULL,
+          due_date TEXT,
+          is_settled INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL
         )
       ''');
     }
@@ -360,6 +393,57 @@ class DatabaseHelper {
     });
   }
 
+  // ===== DEBTS =====
+
+  Future<List<Debt>> getAllDebts() async {
+    final db = await database;
+    final result = await db.query('debts', orderBy: 'is_settled ASC, due_date ASC, created_at DESC');
+    return result.map((map) => Debt.fromMap(map)).toList();
+  }
+
+  Future<List<Debt>> getActiveDebts() async {
+    final db = await database;
+    final result = await db.query('debts', where: 'is_settled = 0', orderBy: 'due_date ASC, created_at DESC');
+    return result.map((map) => Debt.fromMap(map)).toList();
+  }
+
+  Future<List<Debt>> getDebtsByType(DebtType type) async {
+    final db = await database;
+    final result = await db.query('debts', where: 'type = ? AND is_settled = 0', whereArgs: [type.name], orderBy: 'due_date ASC');
+    return result.map((map) => Debt.fromMap(map)).toList();
+  }
+
+  Future<int> insertDebt(Debt debt) async {
+    final db = await database;
+    return await db.insert('debts', debt.toMap());
+  }
+
+  Future<int> updateDebt(Debt debt) async {
+    final db = await database;
+    return await db.update('debts', debt.toMap(), where: 'id = ?', whereArgs: [debt.id]);
+  }
+
+  Future<int> deleteDebt(String id) async {
+    final db = await database;
+    return await db.delete('debts', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<double> getTotalIOwe() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      "SELECT COALESCE(SUM(amount - amount_paid), 0) as total FROM debts WHERE type = 'iOwe' AND is_settled = 0",
+    );
+    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
+  }
+
+  Future<double> getTotalOwedToMe() async {
+    final db = await database;
+    final result = await db.rawQuery(
+      "SELECT COALESCE(SUM(amount - amount_paid), 0) as total FROM debts WHERE type = 'owedToMe' AND is_settled = 0",
+    );
+    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
+  }
+
   // ===== STATISTICS =====
 
   Future<double> getTotalByMonth(int year, int month) async {
@@ -443,15 +527,17 @@ class DatabaseHelper {
     final db = await database;
     final budgets = await db.query('budgets');
     final keywords = await db.query('category_keywords');
+    final debts = await getAllDebts();
 
     return {
-      'version': 2,
+      'version': 3,
       'exported_at': DateTime.now().toIso8601String(),
       'categories': categories.map((c) => c.toJson()).toList(),
       'expenses': expenses.map((e) => e.toJson()).toList(),
       'subscriptions': subscriptions.map((s) => s.toJson()).toList(),
       'budgets': budgets,
       'category_keywords': keywords,
+      'debts': debts.map((d) => d.toJson()).toList(),
     };
   }
 
@@ -462,6 +548,7 @@ class DatabaseHelper {
       await txn.delete('subscriptions');
       await txn.delete('budgets');
       await txn.delete('category_keywords');
+      await txn.delete('debts');
       await txn.delete('categories');
 
       for (final catData in (data['categories'] as List<dynamic>)) {
@@ -483,6 +570,11 @@ class DatabaseHelper {
       if (data['category_keywords'] != null) {
         for (final kw in (data['category_keywords'] as List<dynamic>)) {
           await txn.insert('category_keywords', {'category_id': kw['category_id'], 'keyword': kw['keyword']});
+        }
+      }
+      if (data['debts'] != null) {
+        for (final debtData in (data['debts'] as List<dynamic>)) {
+          await txn.insert('debts', Debt.fromJson(debtData as Map<String, dynamic>).toMap());
         }
       }
     });

@@ -4,6 +4,7 @@ import '../data/models/expense.dart';
 import '../data/models/category.dart';
 import '../data/models/subscription.dart';
 import '../data/models/budget.dart';
+import '../data/models/debt.dart';
 import '../data/services/google_drive_service.dart';
 import '../data/services/home_widget_service.dart';
 import '../data/services/notification_service.dart';
@@ -18,6 +19,7 @@ class ExpenseProvider extends ChangeNotifier {
   List<Category> _categories = [];
   List<Subscription> _subscriptions = [];
   List<Budget> _budgets = [];
+  List<Debt> _debts = [];
   bool _isLoading = false;
   String? _error;
   bool _isBackingUp = false;
@@ -32,6 +34,9 @@ class ExpenseProvider extends ChangeNotifier {
   List<Subscription> get subscriptions => _subscriptions;
   List<Subscription> get activeSubscriptions => _subscriptions.where((s) => s.isActive).toList();
   List<Budget> get budgets => _budgets;
+  List<Debt> get debts => _debts;
+  List<Debt> get activeDebts => _debts.where((d) => !d.isSettled).toList();
+  List<Debt> get settledDebts => _debts.where((d) => d.isSettled).toList();
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isBackingUp => _isBackingUp;
@@ -58,6 +63,7 @@ class ExpenseProvider extends ChangeNotifier {
       _expenses = await _db.getExpensesByMonth(_selectedYear, _selectedMonth);
       _subscriptions = await _db.getAllSubscriptions();
       _budgets = await _db.getBudgetsByMonth(_selectedYear, _selectedMonth);
+      _debts = await _db.getAllDebts();
 
       await _widgetService.updateWidget();
 
@@ -296,6 +302,83 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<double> getTotalYearlySubscriptions() async {
     return await _db.getTotalYearlySubscriptions();
+  }
+
+  // ===== DEBTS =====
+
+  Future<bool> addDebt(Debt debt) async {
+    try {
+      await _db.insertDebt(debt);
+      _debts = await _db.getAllDebts();
+      await _autoBackup();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Errore aggiunta debito: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateDebt(Debt debt) async {
+    try {
+      await _db.updateDebt(debt);
+      _debts = await _db.getAllDebts();
+      await _autoBackup();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Errore aggiornamento debito: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteDebt(String id) async {
+    try {
+      await _db.deleteDebt(id);
+      _debts = await _db.getAllDebts();
+      await _autoBackup();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = 'Errore eliminazione debito: $e';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> settleDebt(String id) async {
+    try {
+      final debt = _debts.firstWhere((d) => d.id == id);
+      final updated = debt.copyWith(isSettled: true, amountPaid: debt.amount);
+      return await updateDebt(updated);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> addPaymentToDebt(String id, double paymentAmount) async {
+    try {
+      final debt = _debts.firstWhere((d) => d.id == id);
+      final newPaid = debt.amountPaid + paymentAmount;
+      final settled = newPaid >= debt.amount;
+      final updated = debt.copyWith(
+        amountPaid: newPaid.clamp(0, debt.amount),
+        isSettled: settled,
+      );
+      return await updateDebt(updated);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<double> getTotalIOwe() async {
+    return await _db.getTotalIOwe();
+  }
+
+  Future<double> getTotalOwedToMe() async {
+    return await _db.getTotalOwedToMe();
   }
 
   // ===== BUDGETS =====

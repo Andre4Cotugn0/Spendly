@@ -12,6 +12,7 @@ import '../subscriptions/subscriptions_screen.dart';
 import '../statistics/statistics_screen.dart';
 import '../categories/categories_screen.dart';
 import '../settings/settings_screen.dart';
+import '../debts/debts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: const [
           _HomeContent(),
           SubscriptionsScreen(),
+          DebtsScreen(),
           StatisticsScreen(),
           CategoriesScreen(),
           SettingsScreen(),
@@ -90,16 +92,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () => setState(() => _currentIndex = 1),
               ),
               _NavItem(
-                icon: Icons.bar_chart_outlined,
-                activeIcon: Icons.bar_chart,
-                label: 'Statistiche',
+                icon: Icons.handshake_outlined,
+                activeIcon: Icons.handshake,
+                label: 'Debiti',
                 isActive: _currentIndex == 2,
                 onTap: () => setState(() => _currentIndex = 2),
               ),
               _NavItem(
-                icon: Icons.category_outlined,
-                activeIcon: Icons.category,
-                label: 'Categorie',
+                icon: Icons.bar_chart_outlined,
+                activeIcon: Icons.bar_chart,
+                label: 'Statistiche',
                 isActive: _currentIndex == 3,
                 onTap: () => setState(() => _currentIndex = 3),
               ),
