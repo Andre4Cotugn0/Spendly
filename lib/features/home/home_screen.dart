@@ -602,9 +602,10 @@ class _MonthSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedDate = DateTime(provider.selectedYear, provider.selectedMonth);
+    final topPadding = MediaQuery.of(context).padding.top + 16;
     
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+      padding: EdgeInsets.fromLTRB(20, topPadding, 20, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

@@ -9,8 +9,27 @@ import '../../providers/expense_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../categories/categories_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late Future<double> _totalMonthFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _totalMonthFuture = context.read<ExpenseProvider>().getTotalMonth();
+  }
+
+  void _refreshTotalMonth(ExpenseProvider provider) {
+    setState(() {
+      _totalMonthFuture = provider.getTotalMonth();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +129,7 @@ class SettingsScreen extends StatelessWidget {
           ),
           if (globalBudget != null)
             FutureBuilder<double>(
-              future: provider.getTotalMonth(),
+              future: _totalMonthFuture,
               builder: (context, snapshot) {
                 final spent = snapshot.data ?? 0;
                 final pct = globalBudget.spentPercentage(spent);
@@ -480,6 +499,7 @@ class SettingsScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(ctx);
                 provider.deleteBudget(current.id);
+                _refreshTotalMonth(provider);
               },
               child: Text('Rimuovi', style: TextStyle(color: AppColors.error)),
             ),
@@ -498,6 +518,7 @@ class SettingsScreen extends StatelessWidget {
                   month: now.month,
                   year: now.year,
                 ));
+                _refreshTotalMonth(provider);
                 Navigator.pop(ctx);
               }
             },

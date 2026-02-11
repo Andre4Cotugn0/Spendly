@@ -7,12 +7,16 @@ import '../data/models/budget.dart';
 import '../data/models/debt.dart';
 import '../data/services/csv_export_service.dart';
 import '../data/services/home_widget_service.dart';
+import '../data/services/quick_expense_widget_service.dart';
+import '../data/services/statistics_widget_service.dart';
 import '../data/services/notification_service.dart';
 
 class ExpenseProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper.instance;
   final CsvExportService _csvService = CsvExportService.instance;
   final HomeWidgetService _widgetService = HomeWidgetService.instance;
+  final QuickExpenseWidgetService _quickExpenseWidget = QuickExpenseWidgetService.instance;
+  final StatisticsWidgetService _statsWidget = StatisticsWidgetService.instance;
   final NotificationService _notificationService = NotificationService.instance;
 
   List<Expense> _expenses = [];
@@ -84,13 +88,31 @@ class ExpenseProvider extends ChangeNotifier {
 
   /// Inizializza widget e notifiche senza bloccare il rendering.
   void _initServicesInBackground() {
-    // Widget service
+    // Widget service principale
     Future(() async {
       try {
         await _widgetService.initialize();
         await _widgetService.updateWidget();
       } catch (e) {
         debugPrint('Errore widget service: $e');
+      }
+    });
+
+    // Quick Expense Widget service
+    Future(() async {
+      try {
+        await _quickExpenseWidget.initialize();
+      } catch (e) {
+        debugPrint('Errore quick expense widget service: $e');
+      }
+    });
+
+    // Statistics Widget service
+    Future(() async {
+      try {
+        await _statsWidget.initialize();
+      } catch (e) {
+        debugPrint('Errore statistics widget service: $e');
       }
     });
 
@@ -115,6 +137,8 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       _expenses = await _db.getExpensesByMonth(year, month);
       _budgets = await _db.getBudgetsByMonth(year, month);
+      // Aggiorna i widget quando il mese cambia
+      await _statsWidget.updateForMonthChange();
     } catch (e) {
       _error = 'Errore caricamento spese: $e';
     }
@@ -140,6 +164,8 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.insertExpense(expense);
       await _refreshExpenses();
       await _widgetService.updateWidget();
+      await _quickExpenseWidget.updateAfterExpense(expense.categoryId, expense.amount);
+      await _statsWidget.updateStatistics();
       await _checkBudgetAlert(expense);
       return true;
     } catch (e) {
@@ -154,6 +180,7 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.updateExpense(expense);
       await _refreshExpenses();
       await _widgetService.updateWidget();
+      await _statsWidget.updateStatistics();
       return true;
     } catch (e) {
       _error = 'Errore aggiornamento spesa: $e';
@@ -167,6 +194,7 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.deleteExpense(id);
       await _refreshExpenses();
       await _widgetService.updateWidget();
+      await _statsWidget.updateStatistics();
       return true;
     } catch (e) {
       _error = 'Errore eliminazione spesa: $e';

@@ -16,8 +16,8 @@ void main() async {
   
   await initializeDateFormatting('it_IT', null);
 
-  // Usa solo i font bundled, non scaricarli da rete (blocca il main thread)
-  GoogleFonts.config.allowRuntimeFetching = false;
+  // Consenti il fetch runtime dei font finche' Inter non e' bundled.
+  GoogleFonts.config.allowRuntimeFetching = true;
 
   final prefs = await SharedPreferences.getInstance();
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;

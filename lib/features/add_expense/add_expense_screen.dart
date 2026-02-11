@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/expense.dart';
@@ -26,6 +27,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   late DateTime _selectedDate;
   String? _selectedCategoryId;
   bool _isLoading = false;
+  bool _iconsPrecached = false;
 
   bool get _isEditing => widget.expense != null;
 
@@ -44,6 +46,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         _amountFocusNode.requestFocus();
       });
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_iconsPrecached) return;
+
+    final categories = context.read<ExpenseProvider>().categories;
+    if (categories.isEmpty) return;
+
+    // Precarica le icone SVG per evitare stutter all'apertura.
+    for (final category in categories) {
+      final loader = SvgAssetLoader('assets/icons/${category.iconName}.svg');
+      loader.loadBytes(context);
+    }
+    _iconsPrecached = true;
   }
 
   @override

@@ -64,7 +64,10 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
     ]).animate(_controller);
 
     if (widget.isChanging) {
-      _controller.forward();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _controller.forward(from: 0);
+      });
     }
   }
 
@@ -72,7 +75,10 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
   void didUpdateWidget(ThemeTransitionOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isChanging && !oldWidget.isChanging) {
-      _controller.forward(from: 0);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _controller.forward(from: 0);
+      });
     }
   }
 
