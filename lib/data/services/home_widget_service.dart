@@ -14,6 +14,10 @@ class HomeWidgetService {
 
   /// Inizializza il widget
   Future<void> initialize() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       await HomeWidget.setAppGroupId(_appGroupId);
     } catch (e) {

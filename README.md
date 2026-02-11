@@ -73,8 +73,8 @@ lib/
 
 ```bash
 # Clona il repository
-git clone https://github.com/<tuo-username>/traccia_spese_rapide.git
-cd traccia_spese_rapide
+git clone https://github.com/<tuo-username>/spendly.git
+cd spendly
 
 # Installa le dipendenze
 flutter pub get

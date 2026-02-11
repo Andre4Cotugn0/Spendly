@@ -7,17 +7,17 @@
     android:background="@android:color/white">
 
     <TextView
-        android:id="@+id/expense_widget_title"
+        android:id="@+id/statistics_widget_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Spendly"
+        android:text="Statistics"
         android:textStyle="bold"
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/expense_widget_total"
+        android:id="@+id/statistics_widget_summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total"
+        android:text="Monthly overview"
         android:textSize="14sp" />
 </LinearLayout>

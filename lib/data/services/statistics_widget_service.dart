@@ -5,8 +5,7 @@ import 'dart:io' show Platform;
 import 'dart:convert' show jsonEncode;
 import '../database/database_helper.dart';
 
-/// Servizio per il widget di statistiche mensili
-/// Supporta Android (home_widget) e iOS (lock screen widget iOS 17+)
+/// Servizio per il widget di statistiche mensili (solo Android)
 class StatisticsWidgetService {
   static final StatisticsWidgetService instance = StatisticsWidgetService._init();
   
@@ -17,13 +16,13 @@ class StatisticsWidgetService {
 
   /// Inizializza il servizio widget
   Future<void> initialize() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       await HomeWidget.setAppGroupId(_appGroupId);
-      if (Platform.isAndroid) {
-        await _initializeAndroid();
-      } else if (Platform.isIOS) {
-        await _initializeIOS();
-      }
+      await _initializeAndroid();
     } catch (e) {
       debugPrint('Errore inizializzazione statistics widget: $e');
     }
@@ -38,17 +37,12 @@ class StatisticsWidgetService {
     }
   }
 
-  Future<void> _initializeIOS() async {
-    try {
-      await updateStatistics();
-      debugPrint('Statistics Widget iOS inizializzato');
-    } catch (e) {
-      debugPrint('Errore inizializzazione iOS statistics widget: $e');
-    }
-  }
-
   /// Aggiorna tutte le statistiche del widget
   Future<void> updateStatistics() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       final now = DateTime.now();
       final db = DatabaseHelper.instance;
@@ -126,12 +120,10 @@ class StatisticsWidgetService {
         await HomeWidget.saveWidgetData<String>('trend', trend);
       }
       
-      if (Platform.isAndroid) {
-        await HomeWidget.updateWidget(
-          name: _widgetName,
-          androidName: _widgetName,
-        );
-      }
+      await HomeWidget.updateWidget(
+        name: _widgetName,
+        androidName: _widgetName,
+      );
       
       debugPrint('Statistics Widget aggiornato: €$monthTotal');
     } catch (e) {

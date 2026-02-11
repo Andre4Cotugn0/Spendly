@@ -4,8 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import '../database/database_helper.dart';
 
-/// Servizio per il widget di inserimento rapido spese
-/// Supporta Android (home_widget) e iOS (app clips / extension)
+/// Servizio per il widget di inserimento rapido spese (solo Android)
 class QuickExpenseWidgetService {
   static final QuickExpenseWidgetService instance = QuickExpenseWidgetService._init();
   
@@ -16,13 +15,13 @@ class QuickExpenseWidgetService {
 
   /// Inizializza il servizio widget
   Future<void> initialize() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       await HomeWidget.setAppGroupId(_appGroupId);
-      if (Platform.isAndroid) {
-        await _initializeAndroid();
-      } else if (Platform.isIOS) {
-        await _initializeIOS();
-      }
+      await _initializeAndroid();
     } catch (e) {
       debugPrint('Errore inizializzazione quick expense widget: $e');
     }
@@ -52,44 +51,21 @@ class QuickExpenseWidgetService {
     }
   }
 
-  Future<void> _initializeIOS() async {
-    try {
-      // Su iOS, salva dati nel shared app group per l'app clip
-      // Salva l'ultimo importo e categoria
-      final lastExpense = await DatabaseHelper.instance
-          .getExpensesByMonth(DateTime.now().year, DateTime.now().month)
-          .then((e) => e.isNotEmpty ? e.last : null);
-      
-      if (lastExpense != null) {
-        await HomeWidget.saveWidgetData<String>(
-          'lastAmount',
-          lastExpense.amount.toStringAsFixed(2),
-        );
-        await HomeWidget.saveWidgetData<String>(
-          'lastCategoryId',
-          lastExpense.categoryId,
-        );
-      }
-      
-      debugPrint('Quick Expense Widget iOS inizializzato');
-    } catch (e) {
-      debugPrint('Errore inizializzazione iOS widget: $e');
-    }
-  }
-
   /// Aggiorna il widget dopo aver aggiunto una spesa
   Future<void> updateAfterExpense(String categoryId, double amount) async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       // Salva l'ultima spesa aggiunta
       await HomeWidget.saveWidgetData<String>('lastAmount', amount.toStringAsFixed(2));
       await HomeWidget.saveWidgetData<String>('lastCategoryId', categoryId);
       
-      if (Platform.isAndroid) {
-        await HomeWidget.updateWidget(
-          name: _widgetName,
-          androidName: _widgetName,
-        );
-      }
+      await HomeWidget.updateWidget(
+        name: _widgetName,
+        androidName: _widgetName,
+      );
       
       debugPrint('Quick Expense Widget aggiornato: €$amount');
     } catch (e) {
@@ -99,6 +75,10 @@ class QuickExpenseWidgetService {
 
   /// Aggiorna il widget con il totale del mese
   Future<void> updateWithMonthTotal() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
     try {
       final now = DateTime.now();
       final total = await DatabaseHelper.instance.getTotalByMonth(now.year, now.month);
@@ -112,12 +92,10 @@ class QuickExpenseWidgetService {
       
       await HomeWidget.saveWidgetData<String>('monthTotal', formattedTotal);
       
-      if (Platform.isAndroid) {
-        await HomeWidget.updateWidget(
-          name: _widgetName,
-          androidName: _widgetName,
-        );
-      }
+      await HomeWidget.updateWidget(
+        name: _widgetName,
+        androidName: _widgetName,
+      );
       
       debugPrint('Quick Expense Widget totale aggiornato: $formattedTotal');
     } catch (e) {

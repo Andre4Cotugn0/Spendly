@@ -67,5 +67,10 @@
 	<!-- Network Usage Description for debugging -->
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Spendly usa la rete locale per il debug e lo sviluppo con hot reload</string>
+	<!-- Bonjour services for Flutter debug VM service discovery -->
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_dartVmService._tcp</string>
+	</array>
 </dict>
 </plist>

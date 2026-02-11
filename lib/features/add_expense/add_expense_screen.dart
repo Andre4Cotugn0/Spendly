@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -34,6 +33,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    // Listener per aggiornare lo stato del pulsante quando cambia l'importo
+    _amountController.addListener(() {
+      setState(() {});
+    });
+    
     if (_isEditing) {
       _amountController.text = widget.expense!.amount.toStringAsFixed(2);
       _descriptionController.text = widget.expense!.description ?? '';
@@ -153,7 +157,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         fontWeight: FontWeight.w600,
         color: AppColors.textSecondary,
       ),
-    ).animate().fadeIn(duration: 200.ms);
+    );
   }
 
   Widget _buildAmountInput() {
@@ -256,7 +260,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.1, end: 0);
+    );
   }
 
   Widget _buildQuickDateButtons() {
@@ -289,7 +293,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           ),
         ),
       ],
-    ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
+    );
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
@@ -375,10 +379,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ],
             ),
           ),
-        ).animate().fadeIn(
-              delay: Duration(milliseconds: 50 * (index % 4)),
-              duration: 200.ms,
-            );
+        );
       },
     );
   }
@@ -420,7 +421,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         minLines: 1,
         textCapitalization: TextCapitalization.sentences,
       ),
-    ).animate().fadeIn(delay: 200.ms, duration: 300.ms);
+    );
   }
 
   Widget _buildBottomSaveButton(ExpenseProvider provider) {
@@ -448,56 +449,76 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         top: false,
         child: SizedBox(
           height: 56,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              gradient: isReady ? AppColors.primaryGradient : null,
-              color: isReady ? null : AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: isReady
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withAlpha(40),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: Container(
+              key: ValueKey<bool>(isReady),
+              decoration: BoxDecoration(
+                gradient: isReady
+                    ? AppColors.primaryGradient
+                    : LinearGradient(
+                        colors: [
+                          AppColors.surfaceLight,
+                          AppColors.surfaceLight,
+                        ],
                       ),
-                    ]
-                  : null,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: (_isLoading || !isReady) ? null : () => _saveExpense(provider),
                 borderRadius: BorderRadius.circular(16),
-                child: Center(
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _isEditing ? Icons.check_rounded : Icons.add_rounded,
-                              color: isReady ? Colors.white : AppColors.textTertiary,
-                              size: 22,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              _isEditing ? 'Salva Modifiche' : 'Aggiungi Spesa',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: isReady ? Colors.white : AppColors.textTertiary,
-                              ),
-                            ),
-                          ],
+                boxShadow: isReady
+                    ? [
+                        BoxShadow(
+                          color: AppColors.primary.withAlpha(40),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
                         ),
+                      ]
+                    : const [],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: (_isLoading || !isReady) ? null : () => _saveExpense(provider),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Center(
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _isEditing ? Icons.check_rounded : Icons.add_rounded,
+                                color: isReady ? Colors.white : AppColors.textTertiary,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                _isEditing ? 'Salva Modifiche' : 'Aggiungi Spesa',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: isReady ? Colors.white : AppColors.textTertiary,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
               ),
             ),

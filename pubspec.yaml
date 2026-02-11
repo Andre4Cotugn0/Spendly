@@ -1,4 +1,4 @@
-name: traccia_spese_rapide
+name: spendly
 description: "Spendly - Traccia spese, abbonamenti e budget con AI insights"
 publish_to: 'none'
 
@@ -58,8 +58,6 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon.png"
-  adaptive_icon_background: "#0D0D0D"
-  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   remove_alpha_ios: true
   # Disabilita la generazione automatica per evitare errori
   ios_content_mode: "scaleAspectFill"
