@@ -7,7 +7,7 @@ import '../database/database_helper.dart';
 /// Servizio per gestire il widget della home screen Android
 class HomeWidgetService {
   static final HomeWidgetService instance = HomeWidgetService._init();
-  static const String _appGroupId = 'group.com.andre4cotugn0.spendly';
+  static const String _appGroupId = 'group.com.andre4cotugn0.moneyra';
   static const String _androidWidgetName = 'ExpenseWidgetProvider';
 
   HomeWidgetService._init();

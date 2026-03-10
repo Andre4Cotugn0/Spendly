@@ -9,7 +9,7 @@ import '../database/database_helper.dart';
 class StatisticsWidgetService {
   static final StatisticsWidgetService instance = StatisticsWidgetService._init();
   
-  static const String _appGroupId = 'group.com.andre4cotugn0.spendly';
+  static const String _appGroupId = 'group.com.andre4cotugn0.moneyra';
   static const String _widgetName = 'StatisticsWidget';
 
   StatisticsWidgetService._init();

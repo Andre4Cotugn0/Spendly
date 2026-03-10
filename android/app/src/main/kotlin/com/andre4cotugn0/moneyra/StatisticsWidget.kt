@@ -1,11 +1,11 @@
-package com.andre4cotugn0.spendly
+package com.andre4cotugn0.moneyra
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
 import es.antonborri.home_widget.HomeWidgetProvider
 
-class QuickExpenseWidget : HomeWidgetProvider() {
+class StatisticsWidget : HomeWidgetProvider() {
 	override fun onUpdate(
 		context: Context,
 		appWidgetManager: AppWidgetManager,

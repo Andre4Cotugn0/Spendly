@@ -142,7 +142,7 @@ class NotificationService {
       await _plugin.zonedSchedule(
         id: -1,
         title: 'Hai tracciato le spese di oggi? 📝',
-        body: 'Apri Spendly per registrare le tue spese giornaliere',
+        body: 'Apri Moneyra per registrare le tue spese giornaliere',
         scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(

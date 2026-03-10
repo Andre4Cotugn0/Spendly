@@ -62,14 +62,14 @@ class ExportService {
       final dateRange = startDate != null && endDate != null
           ? '${_dateFormat.format(startDate).replaceAll('/', '-')}_${_dateFormat.format(endDate).replaceAll('/', '-')}'
           : 'completo';
-      final file = File('${dir.path}/spendly_export_$dateRange.csv');
+      final file = File('${dir.path}/moneyra_export_$dateRange.csv');
       await file.writeAsString(csv);
 
       // Condividi
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Export Spese Spendly',
-        text: 'Export delle spese da Spendly',
+        subject: 'Export Spese Moneyra',
+        text: 'Export delle spese da Moneyra',
       );
 
       return true;
@@ -113,12 +113,12 @@ class ExportService {
       final csv = converter.convert(rows);
 
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/spendly_abbonamenti.csv');
+      final file = File('${dir.path}/moneyra_abbonamenti.csv');
       await file.writeAsString(csv);
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Abbonamenti Spendly',
+        subject: 'Abbonamenti Moneyra',
       );
 
       return true;

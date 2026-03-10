@@ -437,7 +437,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const ListTile(
             leading: Icon(Icons.info_outline),
-            title: Text('Spendly'),
+            title: Text('Moneyra'),
             subtitle: Text('Versione 2.0.0'),
           ),
           ListTile(

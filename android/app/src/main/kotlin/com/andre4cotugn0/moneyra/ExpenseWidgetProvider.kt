@@ -1,4 +1,4 @@
-package com.andre4cotugn0.spendly
+package com.andre4cotugn0.moneyra
 
 import android.appwidget.AppWidgetManager
 import android.content.Context

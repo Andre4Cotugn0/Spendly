@@ -8,7 +8,7 @@ import '../database/database_helper.dart';
 class QuickExpenseWidgetService {
   static final QuickExpenseWidgetService instance = QuickExpenseWidgetService._init();
   
-  static const String _appGroupId = 'group.com.andre4cotugn0.spendly';
+  static const String _appGroupId = 'group.com.andre4cotugn0.moneyra';
   static const String _widgetName = 'QuickExpenseWidget';
 
   QuickExpenseWidgetService._init();

@@ -47,14 +47,14 @@ class CsvExportService {
       final dir = await getTemporaryDirectory();
       final now = DateTime.now();
       final fileName =
-          'spendly_export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.csv';
+          'moneyra_export_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.csv';
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(csvString);
 
       // Condividi
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Spendly - Export spese',
+        subject: 'Moneyra - Export spese',
       );
 
       return true;
@@ -146,13 +146,13 @@ class CsvExportService {
       final dir = await getTemporaryDirectory();
       final now = DateTime.now();
       final fileName =
-          'spendly_completo_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.csv';
+          'moneyra_completo_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.csv';
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(csvString);
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Spendly - Export completo',
+        subject: 'Moneyra - Export completo',
       );
 
       return true;
