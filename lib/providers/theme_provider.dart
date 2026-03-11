@@ -12,22 +12,19 @@ class ThemeProvider extends ChangeNotifier {
   bool _isChangingTheme = false;
   bool get isChangingTheme => _isChangingTheme;
 
-  ThemeProvider() {
+  ThemeProvider({ThemeMode initialThemeMode = ThemeMode.system})
+      : _themeMode = initialThemeMode {
     AppColors.setThemeMode(_themeMode);
-    _load();
   }
 
-  Future<void> _load() async {
+  static Future<ThemeMode> loadSavedThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
     final value = prefs.getString(_key);
-    if (value != null) {
-      _themeMode = ThemeMode.values.firstWhere(
-        (e) => e.name == value,
-        orElse: () => ThemeMode.system,
-      );
-      AppColors.setThemeMode(_themeMode);
-      notifyListeners();
-    }
+    if (value == null) return ThemeMode.system;
+    return ThemeMode.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => ThemeMode.system,
+    );
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

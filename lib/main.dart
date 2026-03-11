@@ -21,7 +21,8 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-  
+  final initialThemeMode = await ThemeProvider.loadSavedThemeMode();
+
   // Edge-to-edge: barra di stato e navigazione trasparenti
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
@@ -33,19 +34,20 @@ void main() async {
     ),
   );
   
-  runApp(MyApp(showOnboarding: !onboardingCompleted));
+  runApp(MyApp(showOnboarding: !onboardingCompleted, initialThemeMode: initialThemeMode));
 }
 
 class MyApp extends StatelessWidget {
   final bool showOnboarding;
-  const MyApp({super.key, required this.showOnboarding});
+  final ThemeMode initialThemeMode;
+  const MyApp({super.key, required this.showOnboarding, required this.initialThemeMode});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(initialThemeMode: initialThemeMode)),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

@@ -53,14 +53,29 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.4
 
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon.png"
   remove_alpha_ios: true
-  # Disabilita la generazione automatica per evitare errori
   ios_content_mode: "scaleAspectFill"
+
+flutter_native_splash:
+  color: "#F5F6FA"
+  color_dark: "#0F0F0F"
+  image: assets/icon/icon-no-bg.png
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+  fullscreen: false
+  web: false
+  android_12:
+    color: "#F5F6FA"
+    color_dark: "#0F0F0F"
+    image: assets/icon/icon-no-bg.png
+    icon_background_color: "#F5F6FA"
+    icon_background_color_dark: "#0F0F0F"
 
 flutter:
   uses-material-design: true
