@@ -92,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,9 +135,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 final pct = globalBudget.spentPercentage(spent);
                 final color = globalBudget.isExceeded(spent) 
                     ? AppColors.error 
-                    : globalBudget.isWarning(spent) 
-                        ? AppColors.warning 
-                        : AppColors.success;
+                    : AppColors.primary;
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                   child: Column(
@@ -161,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: LinearProgressIndicator(
                           value: pct.clamp(0, 1),
                           backgroundColor: AppColors.surfaceLight,
-                          valueColor: AlwaysStoppedAnimation(color),
+                          valueColor: AlwaysStoppedAnimation(AppColors.primary),
                           minHeight: 8,
                         ),
                       ),
@@ -183,7 +181,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(Dimens.radiusL),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,12 +208,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary.withAlpha(26)
-                          : Theme.of(context).inputDecorationTheme.fillColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: isSelected ? AppColors.primary : null, size: 20),
+                    color: AppColors.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary, size: 20),
                   ),
                   title: Text(label),
                   subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
@@ -238,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,10 +255,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.secondary.withAlpha(26),
+                color: AppColors.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.category_outlined, color: AppColors.secondary, size: 20),
+              child: Icon(Icons.category_outlined, color: AppColors.primary, size: 20),
             ),
             title: const Text('Gestisci categorie'),
             subtitle: const Text('Aggiungi o modifica le categorie personalizzate'),
@@ -282,7 +278,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -334,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withAlpha(26),
+                color: AppColors.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(Icons.receipt_long, color: AppColors.primary, size: 20),
@@ -369,10 +365,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.secondary.withAlpha(26),
+                color: AppColors.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.file_download_outlined, color: AppColors.secondary, size: 20),
+              child: Icon(Icons.file_download_outlined, color: AppColors.primary, size: 20),
             ),
             title: const Text('Esporta tutto'),
             subtitle: const Text('Spese, categorie, abbonamenti e debiti'),
@@ -390,8 +386,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (context.mounted) {
       if (!success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Errore durante l\'export'),
+          SnackBar(
+            content: const Text('Errore durante l\'export'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -404,8 +400,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (context.mounted) {
       if (!success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Errore durante l\'export'),
+          SnackBar(
+            content: const Text('Errore durante l\'export'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -418,7 +414,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,7 +440,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.person_outline),
             title: const Text('Sviluppato da'),
             subtitle: const Text('Andre4Cotugn0'),
-            trailing: const Icon(Icons.open_in_new, size: 18),
+            trailing: Icon(Icons.open_in_new, size: 18, color: AppColors.primary),
             onTap: () => launchUrl(
               Uri.parse('https://github.com/Andre4Cotugn0'),
               mode: LaunchMode.externalApplication,
@@ -452,7 +448,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             leading: ShaderMask(
-              shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+              shaderCallback: (bounds) => AppGradients.primary.createShader(bounds),
               child: const Icon(Icons.flutter_dash, color: Colors.white),
             ),
             title: const Text('Sviluppato con'),

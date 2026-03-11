@@ -109,7 +109,7 @@ class DebtsScreen extends StatelessWidget {
                   (context, index) {
                     final debt = settled[index];
                     return Opacity(
-                      opacity: 0.5,
+                      opacity: 0.45,
                       child: _DebtItem(
                         debt: debt,
                         onTap: () => _showOptions(context, debt, provider),
@@ -148,8 +148,8 @@ class DebtsScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Dimens.radiusXL)),
       ),
       builder: (context) => Padding(
         padding: const EdgeInsets.all(20),
@@ -157,11 +157,11 @@ class DebtsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
+              width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceLighter,
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(Dimens.radiusFull),
               ),
             ),
             const SizedBox(height: 16),
@@ -195,8 +195,8 @@ class DebtsScreen extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.payments_outlined,
-                    color: AppColors.secondary),
+                leading: Icon(Icons.payments_outlined,
+                    color: AppColors.primaryLight),
                 title: const Text('Registra pagamento parziale'),
                 onTap: () {
                   Navigator.pop(context);
@@ -333,11 +333,7 @@ class _SummaryCards extends StatelessWidget {
                 title: 'Devo',
                 amount: snapshot.data ?? 0,
                 icon: Icons.arrow_upward,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF6B6B), Color(0xFFEE5A24)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                isIOwe: true,
               );
             },
           ),
@@ -349,11 +345,7 @@ class _SummaryCards extends StatelessWidget {
                 title: 'Mi devono',
                 amount: snapshot.data ?? 0,
                 icon: Icons.arrow_downward,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF00D9FF), Color(0xFF4CAF50)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                isIOwe: false,
               );
             },
           ),
@@ -367,37 +359,51 @@ class _SummaryCard extends StatelessWidget {
   final String title;
   final double amount;
   final IconData icon;
-  final LinearGradient gradient;
+  final bool isIOwe;
 
   const _SummaryCard({
     required this.title,
     required this.amount,
     required this.icon,
-    required this.gradient,
+    required this.isIOwe,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = isIOwe ? AppColors.error : AppColors.success;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
+        color: color.withAlpha(38),
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
+        border: Border.all(color: color.withAlpha(80), width: 1),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.textOnAccent, size: 20),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withAlpha(50),
+              borderRadius: BorderRadius.circular(Dimens.radiusS),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
-              style: TextStyle(color: AppColors.textOnAccent, fontSize: 14),
+              style: TextStyle(
+                color: color,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Text(
             Formatters.currency(amount),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: color,
               fontSize: 20,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
@@ -469,12 +475,23 @@ class _DebtItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(Dimens.radiusL),
+          border: Border(left: BorderSide(
+            color: debt.type == DebtType.iOwe
+                ? AppColors.error.withAlpha(120)
+                : AppColors.success.withAlpha(120),
+            width: 3,
+          )),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(Dimens.radiusL),
+          child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Dimens.radiusL),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -487,19 +504,21 @@ class _DebtItem extends StatelessWidget {
                       height: 44,
                       decoration: BoxDecoration(
                         color: debt.type == DebtType.iOwe
-                            ? AppColors.error.withAlpha(26)
-                            : AppColors.success.withAlpha(26),
-                        borderRadius: BorderRadius.circular(12),
+                            ? AppColors.error.withAlpha(38)
+                            : AppColors.success.withAlpha(38),
+                        borderRadius: BorderRadius.circular(Dimens.radiusS),
                       ),
                       child: Center(
                         child: Text(
                           debt.personName.isNotEmpty
                               ? debt.personName[0].toUpperCase()
                               : '?',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: debt.type == DebtType.iOwe
+                                ? AppColors.error
+                                : AppColors.success,
                           ),
                         ),
                       ),
@@ -524,14 +543,16 @@ class _DebtItem extends StatelessWidget {
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: debt.type == DebtType.iOwe
-                                      ? AppColors.error.withAlpha(26)
-                                      : AppColors.success.withAlpha(26),
-                                  borderRadius: BorderRadius.circular(6),
+                                      ? AppColors.error.withAlpha(38)
+                                      : AppColors.success.withAlpha(38),
+                                  borderRadius: BorderRadius.circular(Dimens.radiusFull),
                                 ),
                                 child: Text(
                                   debt.type.label,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: debt.type == DebtType.iOwe
+                                        ? AppColors.error
+                                        : AppColors.success,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -542,15 +563,15 @@ class _DebtItem extends StatelessWidget {
                                 Icon(
                                   Icons.schedule,
                                   size: 12,
-                                  color: Colors.white,
+                                  color: AppColors.textTertiary,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   _formatDueDate(debt),
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: AppColors.textTertiary,
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
@@ -578,10 +599,12 @@ class _DebtItem extends StatelessWidget {
                       children: [
                         Text(
                           Formatters.currency(debt.amount),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: Colors.white,
+                            color: debt.type == DebtType.iOwe
+                                ? AppColors.error
+                                : AppColors.success,
                           ),
                         ),
                         if (debt.amountPaid > 0 && !debt.isSettled) ...[
@@ -606,17 +629,14 @@ class _DebtItem extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: debt.paidPercentage,
                       backgroundColor: AppColors.surfaceLight,
-                      valueColor: AlwaysStoppedAnimation(
-                        debt.type == DebtType.iOwe
-                            ? AppColors.error
-                            : AppColors.success,
-                      ),
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
                       minHeight: 4,
                     ),
                   ),
                 ],
               ],
             ),
+          ),
           ),
         ),
       ),
@@ -643,7 +663,15 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
-          Icon(Icons.handshake_outlined, size: 80, color: AppColors.textTertiary),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.handshake_outlined, size: 40, color: AppColors.primary),
+          ),
           const SizedBox(height: 16),
           Text(
             'Nessun debito',

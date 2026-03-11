@@ -59,23 +59,23 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "assets/icon/icon_adaptive_bg.png"
+  adaptive_icon_foreground: "assets/icon/icon_white.png"
   remove_alpha_ios: true
   ios_content_mode: "scaleAspectFill"
 
 flutter_native_splash:
-  color: "#F5F6FA"
-  color_dark: "#0F0F0F"
-  image: assets/icon/icon-no-bg.png
-  android_gravity: center
-  ios_content_mode: scaleAspectFit
-  fullscreen: false
+  color: "#FFFFFF"
+  color_dark: "#FFFFFF"
   web: false
   android_12:
-    color: "#F5F6FA"
-    color_dark: "#0F0F0F"
+    color: "#FFFFFF"
+    color_dark: "#FFFFFF"
     image: assets/icon/icon-no-bg.png
-    icon_background_color: "#F5F6FA"
-    icon_background_color_dark: "#0F0F0F"
+    image_dark: assets/icon/icon-no-bg.png
+    icon_background_color: "#FFFFFF"
+    icon_background_color_dark: "#FFFFFF"
 
 flutter:
   uses-material-design: true
