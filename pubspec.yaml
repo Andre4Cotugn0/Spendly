@@ -48,6 +48,9 @@ dependencies:
   # URL launcher (crediti / link esterni)
   url_launcher: ^6.3.0
 
+  # Info app (versione, build number)
+  package_info_plus: ^8.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

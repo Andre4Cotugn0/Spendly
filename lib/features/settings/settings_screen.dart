@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
@@ -18,11 +19,15 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late Future<double> _totalMonthFuture;
+  String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
     _totalMonthFuture = context.read<ExpenseProvider>().getTotalMonth();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _appVersion = info.version);
+    });
   }
 
   void _refreshTotalMonth(ExpenseProvider provider) {
@@ -159,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: LinearProgressIndicator(
                           value: pct.clamp(0, 1),
                           backgroundColor: AppColors.surfaceLight,
-                          valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                          valueColor: AlwaysStoppedAnimation(color),
                           minHeight: 8,
                         ),
                       ),
@@ -431,10 +436,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Moneyra'),
-            subtitle: Text('Versione 0.1.0-alpha'),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Moneyra'),
+            subtitle: Text(_appVersion.isNotEmpty ? 'Versione $_appVersion' : ''),
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
