@@ -86,7 +86,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   icon: Icons.calendar_today,
                   label: 'Media/Giorno',
                   value: Formatters.currencyCompact(avgDaily),
-                  color: AppColors.secondary,
+                  color: AppColors.primaryLight,
                 ).animate().fadeIn(delay: 100.ms, duration: 300.ms).slideX(begin: -0.2, end: 0),
               ),
               const SizedBox(width: 12),
@@ -149,7 +149,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [AppColors.primary, AppColors.secondary]),
+                      gradient: LinearGradient(colors: [AppColors.primary, AppColors.primaryLight]),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -330,11 +330,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: isIncrease ? [AppColors.error.withAlpha(100), AppColors.error.withAlpha(50)] : [AppColors.success.withAlpha(100), AppColors.success.withAlpha(50)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  colors: [AppColors.primaryContainer, AppColors.primaryContainer],
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(Dimens.radiusL),
               ),
               child: Row(
                 children: [
@@ -428,7 +426,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             icon: Icons.event,
             label: 'Giorno con più spese',
             value: '$busiestDay ${_getMonthName(provider.selectedMonth)}',
-            color: AppColors.secondary,
+            color: AppColors.primaryLight,
           ),
           const SizedBox(height: 12),
           _InsightRow(
@@ -480,6 +478,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 final index = e.key;
                 final category = provider.getCategoryById(e.value.key);
                 final percentage = e.value.value / total;
+                // Shades di blu per top 3
+                final topBlues = [
+                  const Color(0xFF1F6BFF),
+                  const Color(0xFF4A8CFF),
+                  const Color(0xFF60A5FA),
+                ];
                 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -488,14 +492,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       Container(
                         width: 32, height: 32,
                         decoration: BoxDecoration(
-                          gradient: index == 0 ? const LinearGradient(colors: [Colors.amber, Colors.orange])
-                              : index == 1 ? LinearGradient(colors: [Colors.grey.shade300, Colors.grey.shade400])
-                              : index == 2 ? LinearGradient(colors: [Colors.brown.shade300, Colors.brown.shade400])
-                              : null,
-                          color: index >= 3 ? AppColors.surfaceLight : null,
+                          color: index < 3 ? topBlues[index].withAlpha(30) : AppColors.primaryContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: index < 3 ? Colors.white : AppColors.textTertiary))),
+                        child: Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: index < 3 ? topBlues[index] : AppColors.primary))),
                       ),
                       const SizedBox(width: 12),
                       CategoryIconContainer(iconName: category?.iconName ?? 'other', backgroundColor: category?.color ?? AppColors.textTertiary, size: 42, iconSize: 20),
@@ -555,8 +555,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: AppColors.secondary.withAlpha(26), borderRadius: BorderRadius.circular(10)),
-                    child: Icon(Icons.show_chart, color: AppColors.secondary, size: 20),
+                    decoration: BoxDecoration(color: AppColors.primaryLight.withAlpha(26), borderRadius: BorderRadius.circular(10)),
+                    child: Icon(Icons.show_chart, color: AppColors.primaryLight, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Text('Andamento Giornaliero', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
@@ -602,7 +602,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         spots: spots,
                         isCurved: true,
                         curveSmoothness: 0.35,
-                        gradient: AppColors.primaryGradient,
+                        gradient: AppGradients.primary,
                         barWidth: 3,
                         isStrokeCapRound: true,
                         dotData: FlDotData(
@@ -621,7 +621,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     ],
                     lineTouchData: LineTouchData(
                       touchTooltipData: LineTouchTooltipData(
-                        getTooltipColor: (touchedSpot) => AppColors.surfaceLighter,
+                        getTooltipColor: (touchedSpot) => AppColors.surfaceLight,
                         tooltipRoundedRadius: 8,
                         getTooltipItems: (spots) => spots.map((s) => LineTooltipItem(Formatters.currency(s.y), TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 12))).toList(),
                       ),
@@ -681,7 +681,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         width: 28, height: 28,
                         decoration: BoxDecoration(
                           gradient: index == 0 ? LinearGradient(colors: [AppColors.error, AppColors.error.withAlpha(180)]) : null,
-                          color: index != 0 ? AppColors.surfaceLighter : null,
+                          color: index != 0 ? AppColors.surfaceLight : null,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Center(child: Text('${index + 1}', style: TextStyle(color: index == 0 ? Colors.white : AppColors.textTertiary, fontWeight: FontWeight.bold, fontSize: 13))),
@@ -750,14 +750,14 @@ class _MonthSelector extends StatelessWidget {
         children: [
           IconButton(
             onPressed: provider.previousMonth,
-            icon: const Icon(Icons.chevron_left),
-            style: IconButton.styleFrom(backgroundColor: AppColors.surfaceLight),
+            icon: Icon(Icons.chevron_left, color: AppColors.primary),
+            style: IconButton.styleFrom(backgroundColor: Colors.transparent),
           ),
           Text(Formatters.monthYear(selectedDate), style: Theme.of(context).textTheme.titleLarge),
           IconButton(
             onPressed: provider.nextMonth,
-            icon: const Icon(Icons.chevron_right),
-            style: IconButton.styleFrom(backgroundColor: AppColors.surfaceLight),
+            icon: Icon(Icons.chevron_right, color: AppColors.primary),
+            style: IconButton.styleFrom(backgroundColor: Colors.transparent),
           ),
         ],
       ),
@@ -779,15 +779,15 @@ class _StatCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 8, offset: const Offset(0, 2))],
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withAlpha(26), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color, size: 20),
+            decoration: BoxDecoration(color: AppColors.primaryContainer, shape: BoxShape.circle),
+            child: Icon(icon, color: AppColors.primary, size: 20),
           ),
           const SizedBox(height: 10),
           Text(label, style: TextStyle(fontSize: 11, color: AppColors.textTertiary), textAlign: TextAlign.center),

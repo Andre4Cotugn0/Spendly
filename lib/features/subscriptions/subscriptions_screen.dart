@@ -57,7 +57,7 @@ class SubscriptionsScreen extends StatelessWidget {
                         ),
                         child: Text(
                           '${active.length}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.success,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
@@ -169,18 +169,18 @@ class SubscriptionsScreen extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Dimens.radiusXL)),
       ),
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40, height: 4,
+              width: 36, height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceLighter,
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(Dimens.radiusFull),
               ),
             ),
             const SizedBox(height: 16),
@@ -266,7 +266,7 @@ class _SummaryCards extends StatelessWidget {
                 title: 'Costo mensile',
                 amount: snapshot.data ?? 0,
                 icon: Icons.calendar_month,
-                gradient: AppColors.primaryGradient,
+                gradient: AppGradients.primary,
               );
             },
           ),
@@ -274,14 +274,34 @@ class _SummaryCards extends StatelessWidget {
           FutureBuilder<double>(
             future: provider.getTotalYearlySubscriptions(),
             builder: (context, snapshot) {
-              return _SummaryCard(
-                title: 'Costo annuale',
-                amount: snapshot.data ?? 0,
-                icon: Icons.calendar_today,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF00D9FF), Color(0xFF4CAF50)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(Dimens.radiusXL),
+                  border: Border.all(color: AppColors.border, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: AppColors.primaryContainer, shape: BoxShape.circle),
+                      child: Icon(Icons.calendar_today, color: AppColors.primary, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text('Costo annuale', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                    ),
+                    Text(
+                      Formatters.currency(snapshot.data ?? 0),
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -311,7 +331,7 @@ class _SummaryCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: gradient,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Dimens.radiusXL),
       ),
       child: Row(
         children: [
@@ -355,13 +375,16 @@ class _SubscriptionItem extends StatelessWidget {
     final daysUntil = nextPayment.difference(DateTime.now()).inDays;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Material(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimens.radiusL),
+          side: BorderSide(color: AppColors.border, width: 1),
+        ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Dimens.radiusL),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -377,31 +400,31 @@ class _SubscriptionItem extends StatelessWidget {
                     children: [
                       Text(
                         subscription.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.surfaceLight,
-                              borderRadius: BorderRadius.circular(6),
+                              color: AppColors.primaryContainer,
+                              borderRadius: BorderRadius.circular(Dimens.radiusFull),
                             ),
                             child: Text(
                               subscription.frequency.label,
                               style: TextStyle(
-                                color: AppColors.textSecondary,
+                                color: AppColors.primary,
                                 fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Icon(Icons.schedule, size: 12, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
                           Text(
                             daysUntil == 0
                                 ? 'Oggi'
@@ -409,7 +432,7 @@ class _SubscriptionItem extends StatelessWidget {
                                     ? 'Domani'
                                     : 'tra $daysUntil giorni',
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: AppColors.textTertiary,
                               fontSize: 12,
                             ),
                           ),
@@ -457,18 +480,26 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
-          Icon(Icons.autorenew, size: 80, color: AppColors.textTertiary),
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.autorenew, size: 36, color: AppColors.primary),
+          ),
           const SizedBox(height: 16),
           Text(
             'Nessun abbonamento',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tieni traccia di Netflix, Spotify, abbonamenti\ne pagamenti ricorrenti',
-            style: TextStyle(color: AppColors.textTertiary),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),

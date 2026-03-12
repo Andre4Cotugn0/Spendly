@@ -1,17 +1,17 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../core/theme/app_theme.dart';
+import 'animated_dots.dart';
 
 class ThemeTransitionOverlay extends StatefulWidget {
   final bool isChanging;
-  final bool isDarkTheme;
+  final bool isDarkTarget;
+  final VoidCallback onComplete;
 
   const ThemeTransitionOverlay({
     super.key,
     required this.isChanging,
-    required this.isDarkTheme,
+    required this.isDarkTarget,
+    required this.onComplete,
   });
 
   @override
@@ -19,54 +19,66 @@ class ThemeTransitionOverlay extends StatefulWidget {
 }
 
 class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  // Unico controller con TweenSequence a 3 fasi:
+  // 18% fade-in (~250ms) | 64% hold (~900ms) | 18% fade-out (~250ms) — totale ~1400ms
+  late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
+  late AnimationController _dotsController;
 
-  final List<String> icons = [
-    'wallet',
-    'shopping',
-    'food',
-    'transport',
-    'home',
-    'entertainment',
-    'health',
-    'education',
-    'travel',
-    'coffee',
-    'gym',
-    'gift',
-  ];
+  // Garantisce che onComplete venga chiamato al massimo una volta
+  bool _completedOnce = false;
+
+  void _safeComplete() {
+    if (!_completedOnce) {
+      _completedOnce = true;
+      widget.onComplete();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 2000),
+
+    _fadeController = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 1400),
     );
 
     _fadeAnimation = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(begin: 0.0, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
-        weight: 10,
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 18,
       ),
       TweenSequenceItem(
         tween: ConstantTween<double>(1.0),
-        weight: 80,
+        weight: 64,
       ),
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.0, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
-        weight: 10,
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 18,
       ),
-    ]).animate(_controller);
+    ]).animate(_fadeController);
+
+    // Percorso normale: animazione completata
+    _fadeController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _safeComplete();
+      }
+    });
+
+    _dotsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
 
     if (widget.isChanging) {
+      // addPostFrameCallback: garantisce che il widget sia nel tree
+      // e il ticker sia attivo prima di avviare l'animazione
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _controller.forward(from: 0);
+        if (mounted) _fadeController.forward(from: 0);
       });
     }
   }
@@ -75,16 +87,20 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
   void didUpdateWidget(ThemeTransitionOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isChanging && !oldWidget.isChanging) {
+      _completedOnce = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _controller.forward(from: 0);
+        if (mounted) _fadeController.forward(from: 0);
       });
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // Fallback: se il widget viene rimosso prima che l'animazione finisca,
+    // completa comunque il Completer per sbloccare setThemeMode()
+    _safeComplete();
+    _fadeController.dispose();
+    _dotsController.dispose();
     super.dispose();
   }
 
@@ -92,65 +108,123 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
   Widget build(BuildContext context) {
     if (!widget.isChanging) return const SizedBox.shrink();
 
-    final bgColor = widget.isDarkTheme 
-        ? const Color(0xFF0F0F0F) 
-        : const Color(0xFFF5F6FA);
+    final bgColor = widget.isDarkTarget
+        ? const Color(0xFF0F172A)
+        : Colors.white;
+    final titleColor = widget.isDarkTarget
+        ? Colors.white
+        : const Color(0xFF0F172A);
+    final subtitleColor = widget.isDarkTarget
+        ? Colors.grey.shade600
+        : Colors.grey.shade400;
+    final footerColor = widget.isDarkTarget
+        ? Colors.grey.shade700
+        : Colors.grey.shade400;
 
     return Positioned.fill(
       child: AnimatedBuilder(
         animation: _fadeAnimation,
-        builder: (context, child) {
+        builder: (context, _) {
           return Opacity(
             opacity: _fadeAnimation.value,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 800),
+            child: Material(
               color: bgColor,
-              child: Stack(
-                children: [
-                  // Icone animate sparse sullo schermo
-                  ...List.generate(12, (index) {
-                    return _buildFloatingIcon(index);
-                  }),
-                  
-                  // Logo centrale con pulse
-                  Center(
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withAlpha(26),
-                        shape: BoxShape.circle,
-                      ),
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    // ── Body centrale ──────────────────────────
+                    Expanded(
                       child: Center(
-                        child: SvgPicture.asset(
-                          'assets/icons/wallet.svg',
-                          width: 60,
-                          height: 60,
-                          colorFilter: ColorFilter.mode(
-                            AppColors.primary,
-                            BlendMode.srcIn,
-                          ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Logo + label MONEYRA
+                            Column(
+                              children: [
+                                Image.asset(
+                                  'assets/icon/icon-no-bg.png',
+                                  width: 72,
+                                  height: 72,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'MONEYRA',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 3,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            )
+                                .animate()
+                                .fadeIn(duration: 300.ms, curve: Curves.easeOut)
+                                .slideY(begin: -0.08, end: 0, duration: 300.ms),
+
+                            const SizedBox(height: 40),
+
+                            // Titolo
+                            Text(
+                              'Moneyra',
+                              style: TextStyle(
+                                fontSize: 46,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -1.5,
+                                color: titleColor,
+                                height: 1,
+                              ),
+                            )
+                                .animate()
+                                .fadeIn(delay: 80.ms, duration: 300.ms)
+                                .slideY(begin: 0.06, end: 0, delay: 80.ms, duration: 300.ms),
+
+                            const SizedBox(height: 8),
+
+                            // Sottotitolo
+                            Text(
+                              widget.isDarkTarget
+                                  ? 'TEMA SCURO'
+                                  : 'TEMA CHIARO',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 4.5,
+                                color: subtitleColor,
+                              ),
+                            )
+                                .animate()
+                                .fadeIn(delay: 160.ms, duration: 300.ms),
+                          ],
                         ),
                       ),
-                    )
-                        .animate(
-                          onPlay: (controller) => controller.repeat(),
-                        )
-                        .scale(
-                          begin: const Offset(0.9, 0.9),
-                          end: const Offset(1.1, 1.1),
-                          duration: 1000.ms,
-                          curve: Curves.easeInOut,
-                        )
-                        .then()
-                        .scale(
-                          begin: const Offset(1.1, 1.1),
-                          end: const Offset(0.9, 0.9),
-                          duration: 1000.ms,
-                          curve: Curves.easeInOut,
-                        ),
-                  ),
-                ],
+                    ),
+
+                    // ── Footer ───────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 36),
+                      child: Column(
+                        children: [
+                          AnimatedDots(controller: _dotsController)
+                              .animate()
+                              .fadeIn(delay: 250.ms, duration: 300.ms),
+                          const SizedBox(height: 16),
+                          Text(
+                            'SECURE BANKING',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 3,
+                              color: footerColor,
+                            ),
+                          )
+                              .animate()
+                              .fadeIn(delay: 320.ms, duration: 300.ms),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -158,40 +232,6 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
       ),
     );
   }
-
-  Widget _buildFloatingIcon(int index) {
-    final screenSize = MediaQuery.of(context).size;
-    final iconName = icons[index % icons.length];
-    
-    final random = Random(index);
-    
-    // Posizioni random ma distribuite
-    final left = (screenSize.width * (index % 4) / 4) + random.nextDouble() * (screenSize.width / 4 - 60);
-    final top = (screenSize.height * (index ~/ 4) / 3) + random.nextDouble() * (screenSize.height / 3 - 60);
-    
-    final delay = index * 50;
-    
-    return Positioned(
-      left: left,
-      top: top,
-      child: SvgPicture.asset(
-        'assets/icons/$iconName.svg',
-        width: 40,
-        height: 40,
-        colorFilter: ColorFilter.mode(
-          AppColors.primary.withAlpha(77),
-          BlendMode.srcIn,
-        ),
-      )
-          .animate()
-          .scale(
-            delay: Duration(milliseconds: delay),
-            begin: const Offset(0.3, 0.3),
-            end: const Offset(1.0, 1.0),
-            duration: 500.ms,
-            curve: Curves.elasticOut,
-          ),
-    );
-  }
 }
+
 

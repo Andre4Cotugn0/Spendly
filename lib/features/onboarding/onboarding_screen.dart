@@ -15,30 +15,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _currentPage = 0;
 
-  static const _pages = [
+  static final _pages = [
     _OnboardingPage(
       icon: Icons.account_balance_wallet,
       title: 'Traccia le tue spese',
       subtitle: 'Registra ogni spesa in pochi secondi\ncon categorie e note personalizzate.',
       gradient: [AppColors.primary, AppColors.primaryLight],
     ),
-    _OnboardingPage(
+    const _OnboardingPage(
       icon: Icons.autorenew,
       title: 'Gestisci abbonamenti',
       subtitle: 'Tieni sotto controllo Netflix, Spotify\ne tutti i pagamenti ricorrenti.',
-      gradient: [Color(0xFF00D9FF), Color(0xFF4CAF50)],
+      gradient: [Color(0xFF1F6BFF), Color(0xFF4A8CFF)],
     ),
-    _OnboardingPage(
+    const _OnboardingPage(
       icon: Icons.savings_outlined,
       title: 'Controlla il budget',
       subtitle: 'Imposta limiti mensili e ricevi\nnotifiche se li superi.',
-      gradient: [Color(0xFFA66CFF), Color(0xFFFF6B6B)],
+      gradient: [Color(0xFF1F6BFF), Color(0xFF4A8CFF)],
     ),
     _OnboardingPage(
       icon: Icons.bar_chart_rounded,
       title: 'Statistiche dettagliate',
       subtitle: 'Grafici interattivi, budget mensile\ned esportazione CSV.',
-      gradient: [AppColors.primary, AppColors.secondary],
+      gradient: [AppColors.primary, AppColors.primaryLight],
     ),
   ];
 
@@ -101,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         height: 8,
                         margin: const EdgeInsets.only(right: 6),
                         decoration: BoxDecoration(
-                          color: _currentPage == i ? AppColors.primary : AppColors.surfaceLighter,
+                          color: _currentPage == i ? AppColors.primary : AppColors.border,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       );
@@ -125,8 +125,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       width: _currentPage == _pages.length - 1 ? 140 : 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(16),
+                        gradient: AppGradients.primary,
+                        borderRadius: BorderRadius.circular(Dimens.radiusFull),
                         boxShadow: [
                           BoxShadow(
                             color: AppColors.primary.withAlpha(77),
@@ -173,10 +173,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(32),
+              shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: page.gradient.first.withAlpha(60),
+                  color: AppColors.primary.withAlpha(77),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                 ),

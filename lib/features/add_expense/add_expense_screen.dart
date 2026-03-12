@@ -162,41 +162,24 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   Widget _buildAmountInput() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.surface,
-            AppColors.surfaceLight.withAlpha(128),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: AppColors.surfaceLight,
-          width: 1,
-        ),
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(Dimens.radiusL),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withAlpha(26),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'IMPORTO',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-              ),
+          Text(
+            'Importo',
+            style: TextStyle(
+              color: AppColors.textTertiary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -328,23 +311,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
             decoration: BoxDecoration(
-              color: isSelected 
-                  ? category.color.withAlpha(38)
-                  : AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.surfaceLight,
+              borderRadius: BorderRadius.circular(Dimens.radiusM),
               border: Border.all(
-                color: isSelected ? category.color : Colors.transparent,
+                color: isSelected ? AppColors.primary : Colors.transparent,
                 width: 2,
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: category.color.withAlpha(30),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -387,12 +359,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   Widget _buildDescriptionInput() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.surfaceLight,
-          width: 1,
-        ),
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(Dimens.radiusM),
       ),
       child: TextFormField(
         controller: _descriptionController,
@@ -466,14 +434,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               key: ValueKey<bool>(isReady),
               decoration: BoxDecoration(
                 gradient: isReady
-                    ? AppColors.primaryGradient
+                    ? AppGradients.primary
                     : LinearGradient(
-                        colors: [
-                          AppColors.surfaceLight,
-                          AppColors.surfaceLight,
-                        ],
+                        colors: [AppColors.surfaceLight, AppColors.surfaceLight],
                       ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(Dimens.radiusFull),
                 boxShadow: isReady
                     ? [
                         BoxShadow(
@@ -488,7 +453,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: (_isLoading || !isReady) ? null : () => _saveExpense(provider),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(Dimens.radiusFull),
                   child: Center(
                     child: _isLoading
                         ? const SizedBox(
@@ -654,8 +619,8 @@ class _QuickDateButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withAlpha(26) : AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.primaryContainer : AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(Dimens.radiusFull),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.transparent,
             width: 1.5,

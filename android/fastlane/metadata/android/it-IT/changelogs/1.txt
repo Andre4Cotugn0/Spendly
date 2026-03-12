@@ -1,0 +1,15 @@
+Benvenuto in Moneyra 0.1.0-alpha!
+
+Prima release ufficiale dell'app. Moneyra ti aiuta a tenere sotto controllo le tue finanze personali in modo semplice e veloce.
+
+Funzionalità incluse:
+• Registra e gestisci le tue spese quotidiane
+• Tieni traccia degli abbonamenti attivi e del loro costo annuale
+• Gestisci i debiti con amici e conoscenti
+• Categorie personalizzabili per organizzare le spese
+• Statistiche e grafici mensili per analizzare le uscite
+• Budget mensile con notifica al superamento
+• Widget per la schermata home Android
+• Tema chiaro e scuro
+
+Versione alpha — potrebbero essere presenti piccoli bug. Il tuo feedback è prezioso per migliorare l'app!

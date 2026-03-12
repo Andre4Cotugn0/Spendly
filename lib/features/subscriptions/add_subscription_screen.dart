@@ -527,7 +527,7 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              gradient: isReady ? AppColors.primaryGradient : null,
+              gradient: isReady ? AppGradients.primary : null,
               color: isReady ? null : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               boxShadow: isReady

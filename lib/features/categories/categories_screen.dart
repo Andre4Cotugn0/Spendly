@@ -168,7 +168,7 @@ class CategoriesScreen extends StatelessWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimens.radiusL)),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -178,8 +178,8 @@ class CategoriesScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.surfaceLight,
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
                     ),
                   ),
                   child: Row(
@@ -242,13 +242,13 @@ class CategoriesScreen extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 border: isSelected
                                     ? Border.all(
-                                        color: AppColors.textPrimary,
-                                        width: 3,
+                                        color: AppColors.primary,
+                                        width: 2,
                                       )
                                     : null,
                                 boxShadow: isSelected
                                     ? [BoxShadow(
-                                        color: color.withAlpha(128),
+                                        color: AppColors.primary.withAlpha(80),
                                         blurRadius: 8,
                                       )]
                                     : null,
@@ -296,8 +296,8 @@ class CategoriesScreen extends StatelessWidget {
                               if (success && context.mounted) {
                                 Navigator.pop(context);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Categoria creata'),
+                                  SnackBar(
+                                    content: const Text('Categoria creata'),
                                     backgroundColor: AppColors.success,
                                   ),
                                 );
@@ -349,8 +349,8 @@ class CategoriesScreen extends StatelessWidget {
               final success = await provider.deleteCategory(category.id);
               if (success && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Categoria eliminata'),
+                  SnackBar(
+                    content: const Text('Categoria eliminata'),
                     backgroundColor: AppColors.success,
                   ),
                 );
@@ -383,13 +383,14 @@ class _CategoryItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Dimens.radiusM),
+          border: Border.all(color: AppColors.border, width: 1),
         ),
         child: Row(
           children: [
             CategoryIconContainer(
               iconName: category.iconName,
-              backgroundColor: category.color,
+              backgroundColor: AppColors.primaryContainer,
             ),
             const SizedBox(width: 16),
             Expanded(

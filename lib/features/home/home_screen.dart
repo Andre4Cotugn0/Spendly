@@ -60,169 +60,93 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    // Garantiamo un padding inferiore minimo per le ombre (almeno 16px)
     final bottomInset = MediaQuery.of(context).padding.bottom;
-    final bottomPadding = bottomInset > 0 ? 12.0 : 24.0;
-    return Material(
-      type: MaterialType.transparency,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+      ),
       child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(12, 0, 12, bottomPadding),
-          child: SizedBox(
-            height: 75,
-            child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
+        top: false,
+        child: SizedBox(
+          height: 64 + (bottomInset > 0 ? 0 : 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Left bar - 2 items
-              Expanded(
-                child: Container(
-                  height: 56,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(26),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: AppColors.primary.withAlpha(13),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.autorenew_outlined,
-                        activeIcon: Icons.autorenew,
-                        label: 'Abbonamenti',
-                        isActive: _currentIndex == 1,
-                        onTap: () => setState(() { _loadedTabs.add(1); _currentIndex = 1; }),
-                      ),
-                    ),
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.handshake_outlined,
-                        activeIcon: Icons.handshake,
-                        label: 'Debiti',
-                        isActive: _currentIndex == 2,
-                        onTap: () => setState(() { _loadedTabs.add(2); _currentIndex = 2; }),
-                      ),
-                    ),
-                  ],
-                ),
-                ),
+              _NavItem(
+                icon: Icons.autorenew_outlined,
+                activeIcon: Icons.autorenew,
+                label: 'Abbonamenti',
+                isActive: _currentIndex == 1,
+                onTap: () => setState(() { _loadedTabs.add(1); _currentIndex = 1; }),
               ),
-              // Central FAB
-              const SizedBox(width: 4),
-              Container(
-                width: 64,
-                height: 64,
-                margin: const EdgeInsets.only(bottom: 15),
-                decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withAlpha(77),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      if (_currentIndex == 0) {
-                        _openAddExpense(context);
-                      } else {
-                        setState(() { _loadedTabs.add(0); _currentIndex = 0; });
-                      }
-                    },
-                    customBorder: const CircleBorder(),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: ScaleTransition(
-                            scale: Tween<double>(begin: 0.8, end: 1.0).animate(animation),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Icon(
-                        _currentIndex == 0 ? Icons.add : Icons.home,
-                        key: ValueKey<bool>(_currentIndex == 0),
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                  ),
-                ),
-              ).animate().scale(
-                    duration: 200.ms,
-                    curve: Curves.easeOutBack,
-                  ),
-              // Right bar - 2 items
-              const SizedBox(width: 4),
-              Expanded(
+              _NavItem(
+                icon: Icons.handshake_outlined,
+                activeIcon: Icons.handshake,
+                label: 'Debiti',
+                isActive: _currentIndex == 2,
+                onTap: () => setState(() { _loadedTabs.add(2); _currentIndex = 2; }),
+              ),
+              // Central FAB slot
+              GestureDetector(
+                onTap: () {
+                  if (_currentIndex == 0) {
+                    _openAddExpense(context);
+                  } else {
+                    setState(() { _loadedTabs.add(0); _currentIndex = 0; });
+                  }
+                },
                 child: Container(
+                  width: 56,
                   height: 56,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(26),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                    BoxShadow(
-                      color: AppColors.primary.withAlpha(13),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.bar_chart_outlined,
-                        activeIcon: Icons.bar_chart,
-                        label: 'Statistiche',
-                        isActive: _currentIndex == 3,
-                        onTap: () => setState(() { _loadedTabs.add(3); _currentIndex = 3; }),
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.primary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withAlpha(102),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(begin: 0.8, end: 1.0).animate(animation),
+                        child: child,
                       ),
                     ),
-                    Expanded(
-                      child: _NavItem(
-                        icon: Icons.settings_outlined,
-                        activeIcon: Icons.settings,
-                        label: 'Impostazioni',
-                        isActive: _currentIndex == 4,
-                        onTap: () => setState(() { _loadedTabs.add(4); _currentIndex = 4; }),
-                      ),
+                    child: Icon(
+                      _currentIndex == 0 ? Icons.add_rounded : Icons.home_rounded,
+                      key: ValueKey<bool>(_currentIndex == 0),
+                      color: Colors.white,
+                      size: 26,
                     ),
-                  ],
+                  ),
                 ),
-                ),
+              ).animate().scale(duration: 200.ms, curve: Curves.easeOutBack),
+              _NavItem(
+                icon: Icons.bar_chart_outlined,
+                activeIcon: Icons.bar_chart,
+                label: 'Statistiche',
+                isActive: _currentIndex == 3,
+                onTap: () => setState(() { _loadedTabs.add(3); _currentIndex = 3; }),
+              ),
+              _NavItem(
+                icon: Icons.settings_outlined,
+                activeIcon: Icons.settings,
+                label: 'Impostazioni',
+                isActive: _currentIndex == 4,
+                onTap: () => setState(() { _loadedTabs.add(4); _currentIndex = 4; }),
               ),
             ],
-            ),
           ),
         ),
       ),
@@ -290,26 +214,24 @@ class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin 
         }
       },
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.all(8),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: widget.isActive ? AppColors.primary.withAlpha(26) : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: _buildAnimatedIcon(),
+      child: SizedBox(
+        width: 56,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: widget.isActive ? AppColors.primary.withAlpha(22) : Colors.transparent,
+                borderRadius: BorderRadius.circular(Dimens.radiusS),
+              ),
+              child: _buildAnimatedIcon(),
+            ),
+          ],
         ),
-      ).animate(target: widget.isActive ? 1 : 0).scaleXY(
-            begin: 1.0,
-            end: 1.08,
-            duration: 250.ms,
-            curve: Curves.easeOutBack,
-          ),
+      ),
     );
   }
 
@@ -441,18 +363,18 @@ class _HomeContentState extends State<_HomeContent> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(Dimens.radiusFull),
                   ),
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Cerca spese...',
-                      hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(150)),
-                      prefixIcon: Icon(Icons.search, color: AppColors.textTertiary, size: 20),
+                      hintStyle: TextStyle(color: AppColors.textTertiary),
+                      prefixIcon: Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(Icons.close, size: 18),
+                              icon: const Icon(Icons.close_rounded, size: 18),
                               onPressed: () {
                                 _searchController.clear();
                                 _onSearch('', provider);
@@ -460,6 +382,8 @@ class _HomeContentState extends State<_HomeContent> {
                             )
                           : null,
                       border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onChanged: (q) => _onSearch(q, provider),
@@ -530,19 +454,19 @@ class _HomeContentState extends State<_HomeContent> {
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Dimens.radiusXL)),
       ),
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
+              width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceLighter,
-                borderRadius: BorderRadius.circular(2),
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(Dimens.radiusFull),
               ),
             ),
             const SizedBox(height: 20),
@@ -603,29 +527,37 @@ class _MonthSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedDate = DateTime(provider.selectedYear, provider.selectedMonth);
     final topPadding = MediaQuery.of(context).padding.top + 16;
-    
+    final now = DateTime.now();
+    final hour = now.hour;
+    final greeting = hour < 12 ? 'Buongiorno' : (hour < 18 ? 'Buon pomeriggio' : 'Buonasera');
+
     return Padding(
       padding: EdgeInsets.fromLTRB(20, topPadding, 20, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: provider.previousMonth,
-            icon: const Icon(Icons.chevron_left),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.surfaceLight,
-            ),
-          ),
           Text(
-            Formatters.monthYear(selectedDate),
-            style: Theme.of(context).textTheme.titleLarge,
+            greeting,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-          IconButton(
-            onPressed: provider.nextMonth,
-            icon: const Icon(Icons.chevron_right),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.surfaceLight,
-            ),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: provider.previousMonth,
+                child: Icon(Icons.chevron_left, color: AppColors.primary, size: 28),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  Formatters.monthYear(selectedDate),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              GestureDetector(
+                onTap: provider.nextMonth,
+                child: Icon(Icons.chevron_right, color: AppColors.primary, size: 28),
+              ),
+            ],
           ),
         ],
       ),
@@ -641,12 +573,13 @@ class _TotalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(20),
+          gradient: AppGradients.primary,
+          borderRadius: BorderRadius.circular(Dimens.radiusXL),
         ),
         child: FutureBuilder<double>(
           future: provider.getTotalMonth(),
@@ -656,20 +589,21 @@ class _TotalCard extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Totale spese',
-                  style: TextStyle(
+                Text(
+                  Formatters.monthYear(DateTime(provider.selectedYear, provider.selectedMonth)),
+                  style: const TextStyle(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   Formatters.currency(total),
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: -1,
                   ),
                 ),
@@ -743,36 +677,40 @@ class _ExpenseItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Material(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimens.radiusM),
+          side: BorderSide(color: AppColors.border, width: 1),
+        ),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Dimens.radiusM),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Row(
               children: [
                 CategoryIconContainer(
                   iconName: category?.iconName ?? 'other',
                   backgroundColor: category?.color ?? AppColors.textTertiary,
                 ),
-                  const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         category?.name ?? 'Sconosciuta',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       if (expense.description != null && expense.description!.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.only(top: 3),
                           child: Text(
                             expense.description!,
                             style: TextStyle(
@@ -783,29 +721,26 @@ class _ExpenseItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 3),
+                        child: Text(
+                          Formatters.relativeDate(expense.date),
+                          style: TextStyle(
+                            color: AppColors.textTertiary,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '-${Formatters.currencyCompact(expense.amount)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: AppColors.error,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      Formatters.relativeDate(expense.date),
-                      style: TextStyle(
-                        color: AppColors.textTertiary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                Text(
+                  '-${Formatters.currencyCompact(expense.amount)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: AppColors.error,
+                  ),
                 ),
               ],
             ),
@@ -823,23 +758,32 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 80,
-            color: AppColors.textTertiary,
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.receipt_long_outlined,
+              size: 36,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'Nessuna spesa',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textPrimary,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
             'Tocca + per aggiungere la tua prima spesa',
             style: TextStyle(
-              color: AppColors.textTertiary,
+              color: AppColors.textSecondary,
+              fontSize: 14,
             ),
             textAlign: TextAlign.center,
           ),

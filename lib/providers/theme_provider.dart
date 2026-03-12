@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/app_theme.dart';
@@ -9,8 +10,13 @@ class ThemeProvider extends ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;
 
+  ThemeMode? _targetThemeMode;
+  ThemeMode? get targetThemeMode => _targetThemeMode;
+
   bool _isChangingTheme = false;
   bool get isChangingTheme => _isChangingTheme;
+
+  Completer<void>? _overlayCompleter;
 
   ThemeProvider({ThemeMode initialThemeMode = ThemeMode.system})
       : _themeMode = initialThemeMode {
@@ -28,26 +34,42 @@ class ThemeProvider extends ChangeNotifier {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    // Mostra overlay di transizione
+    if (_isChangingTheme) return;
+
+    _targetThemeMode = mode;
     _isChangingTheme = true;
+    _overlayCompleter = Completer<void>();
     notifyListeners();
 
-    // Aspetta che l'overlay sia completamente visibile
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Attende che l'overlay copra lo schermo.
+    // addPostFrameCallback ~16ms + fade-in ~250ms = ~266ms → 400ms ampio margine
+    await Future.delayed(const Duration(milliseconds: 400));
 
-    // Ora cambia il tema
     _themeMode = mode;
     AppColors.setThemeMode(_themeMode);
     notifyListeners();
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, mode.name);
 
-    // Mantieni l'overlay visibile per il resto dell'animazione
-    await Future.delayed(const Duration(milliseconds: 1500));
-    
+    // Aspetta che l'overlay completi la sua animazione.
+    // Timeout di sicurezza: se qualcosa va storto l'app non rimane bloccata.
+    await _overlayCompleter!.future.timeout(
+      const Duration(seconds: 2),
+      onTimeout: () {},
+    );
+
     _isChangingTheme = false;
+    _targetThemeMode = null;
+    _overlayCompleter = null;
     notifyListeners();
+  }
+
+  /// Chiamato dall'overlay quando la sua animazione è completata.
+  void notifyOverlayComplete() {
+    if (_overlayCompleter != null && !_overlayCompleter!.isCompleted) {
+      _overlayCompleter!.complete();
+    }
   }
 
   /// Label leggibile per l'UI
