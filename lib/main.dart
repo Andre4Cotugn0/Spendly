@@ -24,6 +24,12 @@ void main() async {
   final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
   final initialThemeMode = await ThemeProvider.loadSavedThemeMode();
 
+  // Solo orientamento verticale (portrait), app pensata per telefoni
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   // Edge-to-edge: barra di stato e navigazione trasparenti
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(

@@ -43,5 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Keystore e credenziali di firma (NON committare mai questi file)
+/android/key.properties
+/android/app/*.jks
+/android/app/*.keystore
 /.serena/*
 /.vscode/*

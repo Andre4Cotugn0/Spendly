@@ -434,7 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('Moneyra'),
-            subtitle: Text('Versione 2.0.0'),
+            subtitle: Text('Versione 0.1.0-alpha'),
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
@@ -445,15 +445,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Uri.parse('https://github.com/Andre4Cotugn0'),
               mode: LaunchMode.externalApplication,
             ),
-          ),
-          ListTile(
-            leading: ShaderMask(
-              shaderCallback: (bounds) => AppGradients.primary.createShader(bounds),
-              child: const Icon(Icons.flutter_dash, color: Colors.white),
-            ),
-            title: const Text('Sviluppato con'),
-            subtitle: const Text('Flutter & Dart'),
-            onTap: () {},
           ),
           const SizedBox(height: 8),
         ],
