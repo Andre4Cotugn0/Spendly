@@ -1,30 +1,26 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
 
-import 'package:moneyra/main.dart';
+import 'package:moneyra/features/add_expense/add_expense_screen.dart';
+import 'package:moneyra/providers/expense_provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp(showOnboarding: false, initialThemeMode: ThemeMode.system));
+  testWidgets('Add expense screen renders primary controls', (
+    WidgetTester tester,
+  ) async {
+    await initializeDateFormatting('it_IT');
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => ExpenseProvider(),
+        child: const MaterialApp(home: AddExpenseScreen()),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Nuova Spesa'), findsOneWidget);
+    expect(find.text('Importo'), findsOneWidget);
+    expect(find.text('Aggiungi Spesa'), findsOneWidget);
   });
 }

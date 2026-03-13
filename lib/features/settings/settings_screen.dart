@@ -18,21 +18,13 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late Future<double> _totalMonthFuture;
   String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
-    _totalMonthFuture = context.read<ExpenseProvider>().getTotalMonth();
     PackageInfo.fromPlatform().then((info) {
       if (mounted) setState(() => _appVersion = info.version);
-    });
-  }
-
-  void _refreshTotalMonth(ExpenseProvider provider) {
-    setState(() {
-      _totalMonthFuture = provider.getTotalMonth();
     });
   }
 
@@ -51,9 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 // Theme Section
-                SliverToBoxAdapter(
-                  child: _buildThemeSection(context),
-                ),
+                SliverToBoxAdapter(child: _buildThemeSection(context)),
 
                 // Export CSV Section
                 SliverToBoxAdapter(
@@ -66,9 +56,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 // Categories Section
-                SliverToBoxAdapter(
-                  child: _buildCategoriesSection(context),
-                ),
+                SliverToBoxAdapter(child: _buildCategoriesSection(context)),
 
                 // Notifications Section
                 SliverToBoxAdapter(
@@ -76,16 +64,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
 
                 // App Info
-                SliverToBoxAdapter(
-                  child: _buildAppInfo(context),
-                ),
+                SliverToBoxAdapter(child: _buildAppInfo(context)),
 
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 100),
-                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -121,7 +105,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppColors.primary.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.account_balance_wallet, color: AppColors.primary, size: 20),
+              child: Icon(
+                Icons.account_balance_wallet,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
             title: const Text('Budget globale'),
             subtitle: Text(
@@ -134,12 +122,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           if (globalBudget != null)
             FutureBuilder<double>(
-              future: _totalMonthFuture,
+              future: provider.getTotalMonth(),
               builder: (context, snapshot) {
                 final spent = snapshot.data ?? 0;
                 final pct = globalBudget.spentPercentage(spent);
-                final color = globalBudget.isExceeded(spent) 
-                    ? AppColors.error 
+                final color = globalBudget.isExceeded(spent)
+                    ? AppColors.error
                     : AppColors.primary;
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -150,7 +138,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           Text(
                             'Speso: ${Formatters.currency(spent)}',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                           Text(
                             'Rimanente: ${Formatters.currency(globalBudget.remaining(spent))}',
@@ -203,9 +194,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-              ...[(ThemeMode.system, 'Sistema', Icons.brightness_auto_outlined, 'Segue il tema del dispositivo'),
-                  (ThemeMode.light, 'Chiaro', Icons.light_mode_outlined, 'Tema chiaro'),
-                  (ThemeMode.dark, 'Scuro', Icons.dark_mode_outlined, 'Tema scuro'),
+              ...[
+                (
+                  ThemeMode.system,
+                  'Sistema',
+                  Icons.brightness_auto_outlined,
+                  'Segue il tema del dispositivo',
+                ),
+                (
+                  ThemeMode.light,
+                  'Chiaro',
+                  Icons.light_mode_outlined,
+                  'Tema chiaro',
+                ),
+                (
+                  ThemeMode.dark,
+                  'Scuro',
+                  Icons.dark_mode_outlined,
+                  'Tema scuro',
+                ),
               ].map((item) {
                 final (mode, label, icon, subtitle) = item;
                 final isSelected = themeProvider.themeMode == mode;
@@ -213,15 +220,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                    color: AppColors.primaryContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: isSelected ? AppColors.primary : AppColors.textSecondary, size: 20),
+                      color: AppColors.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      size: 20,
+                    ),
                   ),
                   title: Text(label),
-                  subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+                  subtitle: Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   trailing: isSelected
-                      ? Icon(Icons.check_circle, color: AppColors.primary, size: 20)
+                      ? Icon(
+                          Icons.check_circle,
+                          color: AppColors.primary,
+                          size: 20,
+                        )
                       : null,
                   onTap: () => themeProvider.setThemeMode(mode),
                 );
@@ -263,14 +283,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppColors.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.category_outlined, color: AppColors.primary, size: 20),
+              child: Icon(
+                Icons.category_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
             title: const Text('Gestisci categorie'),
-            subtitle: const Text('Aggiungi o modifica le categorie personalizzate'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
+            subtitle: const Text(
+              'Aggiungi o modifica le categorie personalizzate',
             ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const CategoriesScreen())),
           ),
           const SizedBox(height: 8),
         ],
@@ -278,7 +304,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ).animate().fadeIn(delay: 200.ms, duration: 300.ms);
   }
 
-  Widget _buildNotificationsSection(BuildContext context, ExpenseProvider provider) {
+  Widget _buildNotificationsSection(
+    BuildContext context,
+    ExpenseProvider provider,
+  ) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       decoration: BoxDecoration(
@@ -311,10 +340,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     color: AppColors.warning.withAlpha(26),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.notifications_active_outlined, color: AppColors.warning, size: 20),
+                  child: Icon(
+                    Icons.notifications_active_outlined,
+                    color: AppColors.warning,
+                    size: 20,
+                  ),
                 ),
                 title: const Text('Promemoria giornaliero'),
-                subtitle: const Text('Ricorda di registrare le spese alle 20:00'),
+                subtitle: const Text(
+                  'Ricorda di registrare le spese alle 20:00',
+                ),
                 value: enabled,
                 onChanged: (v) async {
                   await provider.setDailyReminder(v);
@@ -359,7 +394,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppColors.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.receipt_long, color: AppColors.primary, size: 20),
+              child: Icon(
+                Icons.receipt_long,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
             title: const Text('Esporta spese'),
             subtitle: const Text('Genera un file CSV con tutte le spese'),
@@ -373,7 +412,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: AppColors.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.file_download_outlined, color: AppColors.primary, size: 20),
+              child: Icon(
+                Icons.file_download_outlined,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
             title: const Text('Esporta tutto'),
             subtitle: const Text('Spese, categorie, abbonamenti e debiti'),
@@ -439,13 +482,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Moneyra'),
-            subtitle: Text(_appVersion.isNotEmpty ? 'Versione $_appVersion' : ''),
+            subtitle: Text(
+              _appVersion.isNotEmpty ? 'Versione $_appVersion' : '',
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text('Sviluppato da'),
             subtitle: const Text('Andre4Cotugn0'),
-            trailing: Icon(Icons.open_in_new, size: 18, color: AppColors.primary),
+            trailing: Icon(
+              Icons.open_in_new,
+              size: 18,
+              color: AppColors.primary,
+            ),
             onTap: () => launchUrl(
               Uri.parse('https://github.com/Andre4Cotugn0'),
               mode: LaunchMode.externalApplication,
@@ -457,7 +506,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ).animate().fadeIn(delay: 350.ms, duration: 300.ms);
   }
 
-  void _showBudgetDialog(BuildContext context, ExpenseProvider provider, Budget? current) {
+  void _showBudgetDialog(
+    BuildContext context,
+    ExpenseProvider provider,
+    Budget? current,
+  ) {
     final controller = TextEditingController(
       text: current != null ? current.amount.toStringAsFixed(0) : '',
     );
@@ -488,10 +541,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         actions: [
           if (current != null)
             TextButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                provider.deleteBudget(current.id);
-                _refreshTotalMonth(provider);
+              onPressed: () async {
+                await provider.deleteBudget(current.id);
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                }
               },
               child: Text('Rimuovi', style: TextStyle(color: AppColors.error)),
             ),
@@ -500,18 +554,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Annulla'),
           ),
           ElevatedButton(
-            onPressed: () {
-              final amount = double.tryParse(controller.text.replaceAll(',', '.'));
+            onPressed: () async {
+              final amount = double.tryParse(
+                controller.text.replaceAll(',', '.'),
+              );
               if (amount != null && amount > 0) {
-                final now = DateTime.now();
-                provider.setBudget(Budget(
-                  id: current?.id,
-                  amount: amount,
-                  month: now.month,
-                  year: now.year,
-                ));
-                _refreshTotalMonth(provider);
-                Navigator.pop(ctx);
+                await provider.setBudget(
+                  Budget(
+                    id: current?.id,
+                    amount: amount,
+                    month: provider.selectedMonth,
+                    year: provider.selectedYear,
+                  ),
+                );
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                }
               }
             },
             child: const Text('Salva'),

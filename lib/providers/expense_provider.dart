@@ -15,7 +15,8 @@ class ExpenseProvider extends ChangeNotifier {
   final DatabaseHelper _db = DatabaseHelper.instance;
   final CsvExportService _csvService = CsvExportService.instance;
   final HomeWidgetService _widgetService = HomeWidgetService.instance;
-  final QuickExpenseWidgetService _quickExpenseWidget = QuickExpenseWidgetService.instance;
+  final QuickExpenseWidgetService _quickExpenseWidget =
+      QuickExpenseWidgetService.instance;
   final StatisticsWidgetService _statsWidget = StatisticsWidgetService.instance;
   final NotificationService _notificationService = NotificationService.instance;
 
@@ -26,6 +27,7 @@ class ExpenseProvider extends ChangeNotifier {
   List<Debt> _debts = [];
   bool _isLoading = false;
   String? _error;
+  int _statsRevision = 0;
 
   int _selectedYear = DateTime.now().year;
   int _selectedMonth = DateTime.now().month;
@@ -34,7 +36,8 @@ class ExpenseProvider extends ChangeNotifier {
   List<Expense> get expenses => _expenses;
   List<Category> get categories => _categories;
   List<Subscription> get subscriptions => _subscriptions;
-  List<Subscription> get activeSubscriptions => _subscriptions.where((s) => s.isActive).toList();
+  List<Subscription> get activeSubscriptions =>
+      _subscriptions.where((s) => s.isActive).toList();
   List<Budget> get budgets => _budgets;
   List<Debt> get debts => _debts;
   List<Debt> get activeDebts => _debts.where((d) => !d.isSettled).toList();
@@ -43,6 +46,7 @@ class ExpenseProvider extends ChangeNotifier {
   String? get error => _error;
   int get selectedYear => _selectedYear;
   int get selectedMonth => _selectedMonth;
+  int get statsRevision => _statsRevision;
 
   /// Carica tutti i dati iniziali
   Future<void> loadData() async {
@@ -71,6 +75,7 @@ class ExpenseProvider extends ChangeNotifier {
         _subscriptions = results[1] as List<Subscription>;
         _budgets = results[2] as List<Budget>;
         _debts = results[3] as List<Debt>;
+        _bumpStatsRevision();
       } catch (e) {
         debugPrint('Errore caricamento dati principali: $e');
       }
@@ -120,12 +125,13 @@ class ExpenseProvider extends ChangeNotifier {
     Future(() async {
       try {
         await _notificationService.initialize();
-        await _notificationService.scheduleAllSubscriptionReminders(activeSubscriptions);
+        await _notificationService.scheduleAllSubscriptionReminders(
+          activeSubscriptions,
+        );
       } catch (e) {
         debugPrint('Errore notification service: $e');
       }
     });
-
   }
 
   // ===== MONTH NAVIGATION =====
@@ -137,6 +143,7 @@ class ExpenseProvider extends ChangeNotifier {
     try {
       _expenses = await _db.getExpensesByMonth(year, month);
       _budgets = await _db.getBudgetsByMonth(year, month);
+      _bumpStatsRevision();
       // Aggiorna i widget quando il mese cambia
       await _statsWidget.updateForMonthChange();
     } catch (e) {
@@ -147,13 +154,19 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<void> previousMonth() async {
     int m = _selectedMonth - 1, y = _selectedYear;
-    if (m < 1) { m = 12; y--; }
+    if (m < 1) {
+      m = 12;
+      y--;
+    }
     await setSelectedMonth(y, m);
   }
 
   Future<void> nextMonth() async {
     int m = _selectedMonth + 1, y = _selectedYear;
-    if (m > 12) { m = 1; y++; }
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
     await setSelectedMonth(y, m);
   }
 
@@ -164,7 +177,11 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.insertExpense(expense);
       await _refreshExpenses();
       await _widgetService.updateWidget();
-      await _quickExpenseWidget.updateAfterExpense(expense.categoryId, expense.amount);
+      await _quickExpenseWidget.updateAfterExpense(
+        expense.categoryId,
+        expense.amount,
+      );
+      await _quickExpenseWidget.updateWithMonthTotal();
       await _statsWidget.updateStatistics();
       await _checkBudgetAlert(expense);
       return true;
@@ -180,6 +197,7 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.updateExpense(expense);
       await _refreshExpenses();
       await _widgetService.updateWidget();
+      await _quickExpenseWidget.updateWithMonthTotal();
       await _statsWidget.updateStatistics();
       return true;
     } catch (e) {
@@ -194,6 +212,7 @@ class ExpenseProvider extends ChangeNotifier {
       await _db.deleteExpense(id);
       await _refreshExpenses();
       await _widgetService.updateWidget();
+      await _quickExpenseWidget.updateWithMonthTotal();
       await _statsWidget.updateStatistics();
       return true;
     } catch (e) {
@@ -203,14 +222,16 @@ class ExpenseProvider extends ChangeNotifier {
     }
   }
 
-  Future<List<Expense>> searchExpenses(String query, {
+  Future<List<Expense>> searchExpenses(
+    String query, {
     String? categoryId,
     DateTime? startDate,
     DateTime? endDate,
     double? minAmount,
     double? maxAmount,
   }) async {
-    return await _db.searchExpenses(query,
+    return await _db.searchExpenses(
+      query,
       categoryId: categoryId,
       startDate: startDate,
       endDate: endDate,
@@ -221,6 +242,7 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<void> _refreshExpenses() async {
     _expenses = await _db.getExpensesByMonth(_selectedYear, _selectedMonth);
+    _bumpStatsRevision();
     notifyListeners();
   }
 
@@ -283,9 +305,10 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<bool> addSubscription(Subscription sub) async {
     try {
-      await _db.insertSubscription(sub);
+      final normalizedSub = _normalizeSubscription(sub);
+      await _db.insertSubscription(normalizedSub);
       _subscriptions = await _db.getAllSubscriptions();
-      await _notificationService.scheduleSubscriptionReminder(sub);
+      await _notificationService.scheduleSubscriptionReminder(normalizedSub);
       notifyListeners();
       return true;
     } catch (e) {
@@ -297,12 +320,13 @@ class ExpenseProvider extends ChangeNotifier {
 
   Future<bool> updateSubscription(Subscription sub) async {
     try {
-      await _db.updateSubscription(sub);
+      final normalizedSub = _normalizeSubscription(sub);
+      await _db.updateSubscription(normalizedSub);
       _subscriptions = await _db.getAllSubscriptions();
-      if (sub.isActive && sub.reminderEnabled) {
-        await _notificationService.scheduleSubscriptionReminder(sub);
+      if (normalizedSub.isActive && normalizedSub.reminderEnabled) {
+        await _notificationService.scheduleSubscriptionReminder(normalizedSub);
       } else {
-        await _notificationService.cancelSubscriptionReminder(sub.id);
+        await _notificationService.cancelSubscriptionReminder(normalizedSub.id);
       }
       notifyListeners();
       return true;
@@ -469,7 +493,9 @@ class ExpenseProvider extends ChangeNotifier {
         final total = await getTotalMonth();
         if (globalBudget.isExceeded(total)) {
           await _notificationService.showBudgetExceededNotification(
-            'Totale mensile', total, globalBudget.amount,
+            'Totale mensile',
+            total,
+            globalBudget.amount,
           );
         }
       }
@@ -482,7 +508,9 @@ class ExpenseProvider extends ChangeNotifier {
         if (catBudget.isExceeded(catTotal)) {
           final cat = getCategoryById(expense.categoryId);
           await _notificationService.showBudgetExceededNotification(
-            cat?.name ?? 'Categoria', catTotal, catBudget.amount,
+            cat?.name ?? 'Categoria',
+            catTotal,
+            catBudget.amount,
           );
         }
       }
@@ -508,11 +536,19 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   Future<List<Expense>> getTopExpenses({int limit = 5}) async {
-    return await _db.getTopExpenses(_selectedYear, _selectedMonth, limit: limit);
+    return await _db.getTopExpenses(
+      _selectedYear,
+      _selectedMonth,
+      limit: limit,
+    );
   }
 
   Future<List<Map<String, dynamic>>> getMonthlyTotals({int months = 6}) async {
-    return await _db.getMonthlyTotals(months: months);
+    return await _db.getMonthlyTotals(
+      months: months,
+      endYear: _selectedYear,
+      endMonth: _selectedMonth,
+    );
   }
 
   // ===== CSV EXPORT =====
@@ -539,5 +575,13 @@ class ExpenseProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  void _bumpStatsRevision() {
+    _statsRevision++;
+  }
+
+  Subscription _normalizeSubscription(Subscription sub) {
+    return sub.copyWith(nextPaymentDate: sub.calculateNextPayment());
   }
 }

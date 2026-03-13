@@ -14,7 +14,8 @@ class NotificationService {
   static final NotificationService instance = NotificationService._init();
   NotificationService._init();
 
-  final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
   static const String _prefsDailyReminder = 'daily_reminder_enabled';
@@ -25,7 +26,9 @@ class NotificationService {
 
     tz.initializeTimeZones();
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(
+      '@mipmap/ic_launcher',
+    );
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -39,7 +42,8 @@ class NotificationService {
     await _plugin.initialize(
       settings: initSettings,
       onDidReceiveNotificationResponse: (_) {},
-      onDidReceiveBackgroundNotificationResponse: _onBackgroundNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse:
+          _onBackgroundNotificationResponse,
     );
     _initialized = true;
   }
@@ -48,23 +52,36 @@ class NotificationService {
   Future<void> scheduleSubscriptionReminder(Subscription sub) async {
     if (!sub.reminderEnabled || !sub.isActive) return;
 
-    final reminderDate = sub.nextPaymentDate.subtract(
+    final now = DateTime.now();
+    var nextPaymentDate = sub.calculateNextPayment(from: now);
+    var reminderDate = nextPaymentDate.subtract(
       Duration(days: sub.reminderDaysBefore),
     );
 
-    if (reminderDate.isBefore(DateTime.now())) return;
+    while (reminderDate.isBefore(now)) {
+      nextPaymentDate = sub.advancePaymentDate(nextPaymentDate);
+      reminderDate = nextPaymentDate.subtract(
+        Duration(days: sub.reminderDaysBefore),
+      );
+    }
 
     try {
       await _plugin.zonedSchedule(
         id: sub.id.hashCode,
         title: 'Pagamento in arrivo 💳',
-        body: '${sub.name}: €${sub.amount.toStringAsFixed(2)} ${sub.frequency == SubscriptionFrequency.yearly ? "annuale" : sub.frequency == SubscriptionFrequency.monthly ? "mensile" : "settimanale"} tra ${sub.reminderDaysBefore} ${sub.reminderDaysBefore == 1 ? "giorno" : "giorni"}',
+        body:
+            '${sub.name}: €${sub.amount.toStringAsFixed(2)} ${sub.frequency == SubscriptionFrequency.yearly
+                ? "annuale"
+                : sub.frequency == SubscriptionFrequency.monthly
+                ? "mensile"
+                : "settimanale"} tra ${sub.reminderDaysBefore} ${sub.reminderDaysBefore == 1 ? "giorno" : "giorni"}',
         scheduledDate: tz.TZDateTime.from(reminderDate, tz.local),
         notificationDetails: NotificationDetails(
           android: const AndroidNotificationDetails(
             'subscription_reminders',
             'Promemoria Abbonamenti',
-            channelDescription: 'Notifiche per pagamenti abbonamenti in scadenza',
+            channelDescription:
+                'Notifiche per pagamenti abbonamenti in scadenza',
             importance: Importance.high,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
@@ -134,7 +151,13 @@ class NotificationService {
   Future<void> _scheduleDailyReminder(int hour) async {
     try {
       final now = tz.TZDateTime.now(tz.local);
-      var scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+      );
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
@@ -168,12 +191,17 @@ class NotificationService {
   }
 
   /// Mostra notifica istantanea di superamento budget
-  Future<void> showBudgetExceededNotification(String categoryName, double spent, double budget) async {
+  Future<void> showBudgetExceededNotification(
+    String categoryName,
+    double spent,
+    double budget,
+  ) async {
     try {
       await _plugin.show(
         id: categoryName.hashCode + 10000,
         title: 'Budget superato! ⚠️',
-        body: '$categoryName: speso €${spent.toStringAsFixed(2)} su €${budget.toStringAsFixed(2)}',
+        body:
+            '$categoryName: speso €${spent.toStringAsFixed(2)} su €${budget.toStringAsFixed(2)}',
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'budget_alerts',

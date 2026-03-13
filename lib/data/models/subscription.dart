@@ -58,9 +58,77 @@ class Subscription {
     this.reminderEnabled = true,
     this.reminderDaysBefore = 1,
     DateTime? createdAt,
-  })  : id = id ?? const Uuid().v4(),
-        nextPaymentDate = nextPaymentDate ?? startDate,
-        createdAt = createdAt ?? DateTime.now();
+  }) : id = id ?? const Uuid().v4(),
+       nextPaymentDate =
+           nextPaymentDate ??
+           resolveNextPaymentDate(startDate: startDate, frequency: frequency),
+       createdAt = createdAt ?? DateTime.now();
+
+  static DateTime _advancePaymentDate(
+    DateTime date,
+    SubscriptionFrequency frequency,
+  ) {
+    switch (frequency) {
+      case SubscriptionFrequency.weekly:
+        return date.add(const Duration(days: 7));
+      case SubscriptionFrequency.monthly:
+        return _copyWithClampedDay(
+          base: date,
+          year: date.year,
+          month: date.month + 1,
+        );
+      case SubscriptionFrequency.yearly:
+        return _copyWithClampedDay(
+          base: date,
+          year: date.year + 1,
+          month: date.month,
+        );
+    }
+  }
+
+  static DateTime _copyWithClampedDay({
+    required DateTime base,
+    required int year,
+    required int month,
+  }) {
+    final lastDayOfMonth = DateTime(year, month + 1, 0).day;
+    final day = base.day <= lastDayOfMonth ? base.day : lastDayOfMonth;
+
+    return DateTime(
+      year,
+      month,
+      day,
+      base.hour,
+      base.minute,
+      base.second,
+      base.millisecond,
+      base.microsecond,
+    );
+  }
+
+  static DateTime resolveNextPaymentDate({
+    required DateTime startDate,
+    required SubscriptionFrequency frequency,
+    DateTime? from,
+  }) {
+    final referenceDate = from ?? DateTime.now();
+    var next = DateTime(
+      startDate.year,
+      startDate.month,
+      startDate.day,
+      startDate.hour,
+      startDate.minute,
+      startDate.second,
+      startDate.millisecond,
+      startDate.microsecond,
+    );
+
+    while (next.isBefore(referenceDate)) {
+      next = _advancePaymentDate(next, frequency);
+    }
+
+    return next;
+  }
 
   /// Costo mensile equivalente
   double get monthlyCost {
@@ -87,25 +155,20 @@ class Subscription {
   }
 
   /// Calcola la prossima data di pagamento a partire da oggi
-  DateTime calculateNextPayment() {
-    final now = DateTime.now();
-    DateTime next = nextPaymentDate;
+  DateTime calculateNextPayment({DateTime? from}) {
+    final baseDate = nextPaymentDate.isBefore(startDate)
+        ? startDate
+        : nextPaymentDate;
 
-    while (next.isBefore(now)) {
-      switch (frequency) {
-        case SubscriptionFrequency.weekly:
-          next = next.add(const Duration(days: 7));
-          break;
-        case SubscriptionFrequency.monthly:
-          next = DateTime(next.year, next.month + 1, next.day);
-          break;
-        case SubscriptionFrequency.yearly:
-          next = DateTime(next.year + 1, next.month, next.day);
-          break;
-      }
-    }
-    return next;
+    return resolveNextPaymentDate(
+      startDate: baseDate,
+      frequency: frequency,
+      from: from,
+    );
   }
+
+  DateTime advancePaymentDate(DateTime date) =>
+      _advancePaymentDate(date, frequency);
 
   Map<String, dynamic> toMap() {
     return {
@@ -188,28 +251,138 @@ class Subscription {
 /// Servizi di abbonamento suggeriti
 class SuggestedSubscriptions {
   static const List<Map<String, dynamic>> suggestions = [
-    {'name': 'Netflix', 'amount': 15.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'Spotify', 'amount': 10.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'Amazon Prime', 'amount': 49.90, 'frequency': 'yearly', 'category': 'shopping'},
-    {'name': 'Disney+', 'amount': 8.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'YouTube Premium', 'amount': 11.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'Apple Music', 'amount': 10.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'DAZN', 'amount': 44.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'Crunchyroll', 'amount': 4.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'iCloud+', 'amount': 0.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'Google One', 'amount': 1.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'PlayStation Plus', 'amount': 59.99, 'frequency': 'yearly', 'category': 'entertainment'},
-    {'name': 'Xbox Game Pass', 'amount': 12.99, 'frequency': 'monthly', 'category': 'entertainment'},
-    {'name': 'ChatGPT Plus', 'amount': 20.00, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'Adobe Creative Cloud', 'amount': 62.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'Palestra', 'amount': 30.00, 'frequency': 'monthly', 'category': 'health'},
-    {'name': 'TIM', 'amount': 7.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'Vodafone', 'amount': 9.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'Iliad', 'amount': 7.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'WindTre', 'amount': 9.99, 'frequency': 'monthly', 'category': 'bills'},
-    {'name': 'Assicurazione Auto', 'amount': 500.00, 'frequency': 'yearly', 'category': 'transport'},
-    {'name': 'Bollo Auto', 'amount': 200.00, 'frequency': 'yearly', 'category': 'transport'},
-    {'name': 'Affitto', 'amount': 600.00, 'frequency': 'monthly', 'category': 'home'},
+    {
+      'name': 'Netflix',
+      'amount': 15.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'Spotify',
+      'amount': 10.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'Amazon Prime',
+      'amount': 49.90,
+      'frequency': 'yearly',
+      'category': 'shopping',
+    },
+    {
+      'name': 'Disney+',
+      'amount': 8.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'YouTube Premium',
+      'amount': 11.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'Apple Music',
+      'amount': 10.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'DAZN',
+      'amount': 44.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'Crunchyroll',
+      'amount': 4.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'iCloud+',
+      'amount': 0.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'Google One',
+      'amount': 1.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'PlayStation Plus',
+      'amount': 59.99,
+      'frequency': 'yearly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'Xbox Game Pass',
+      'amount': 12.99,
+      'frequency': 'monthly',
+      'category': 'entertainment',
+    },
+    {
+      'name': 'ChatGPT Plus',
+      'amount': 20.00,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'Adobe Creative Cloud',
+      'amount': 62.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'Palestra',
+      'amount': 30.00,
+      'frequency': 'monthly',
+      'category': 'health',
+    },
+    {
+      'name': 'TIM',
+      'amount': 7.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'Vodafone',
+      'amount': 9.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'Iliad',
+      'amount': 7.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'WindTre',
+      'amount': 9.99,
+      'frequency': 'monthly',
+      'category': 'bills',
+    },
+    {
+      'name': 'Assicurazione Auto',
+      'amount': 500.00,
+      'frequency': 'yearly',
+      'category': 'transport',
+    },
+    {
+      'name': 'Bollo Auto',
+      'amount': 200.00,
+      'frequency': 'yearly',
+      'category': 'transport',
+    },
+    {
+      'name': 'Affitto',
+      'amount': 600.00,
+      'frequency': 'monthly',
+      'category': 'home',
+    },
   ];
 
   static List<Map<String, dynamic>> search(String query) {

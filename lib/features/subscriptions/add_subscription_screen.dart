@@ -216,7 +216,10 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
     ).animate().fadeIn(duration: 300.ms);
   }
 
-  String? _resolveSuggestedCategoryId(List<Category> categories, String? suggestedId) {
+  String? _resolveSuggestedCategoryId(
+    List<Category> categories,
+    String? suggestedId,
+  ) {
     if (categories.isEmpty) return null;
     if (suggestedId != null) {
       for (final category in categories) {
@@ -240,9 +243,15 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
         decoration: InputDecoration(
           hintText: 'Es: Netflix, Spotify...',
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
-          prefixIcon: Icon(Icons.subscriptions_outlined, color: AppColors.textTertiary),
+          prefixIcon: Icon(
+            Icons.subscriptions_outlined,
+            color: AppColors.textTertiary,
+          ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 16,
+          ),
         ),
         textCapitalization: TextCapitalization.words,
         onChanged: (_) => setState(() {}),
@@ -266,10 +275,16 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
           prefixIcon: Padding(
             padding: EdgeInsets.all(14),
-            child: Text('€', style: TextStyle(fontSize: 20, color: AppColors.textSecondary)),
+            child: Text(
+              '€',
+              style: TextStyle(fontSize: 20, color: AppColors.textSecondary),
+            ),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 16,
+          ),
         ),
         style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
         inputFormatters: [
@@ -301,10 +316,14 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary.withAlpha(26) : AppColors.surface,
+                  color: isSelected
+                      ? AppColors.primary.withAlpha(26)
+                      : AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.surfaceLight,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.surfaceLight,
                     width: 1.5,
                   ),
                 ),
@@ -312,8 +331,12 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   child: Text(
                     freq.label,
                     style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
                       fontSize: 14,
                     ),
                   ),
@@ -349,7 +372,9 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: isSelected ? category.color.withAlpha(38) : AppColors.surface,
+              color: isSelected
+                  ? category.color.withAlpha(38)
+                  : AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isSelected ? category.color : Colors.transparent,
@@ -370,7 +395,9 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? category.color : AppColors.textSecondary,
+                    color: isSelected
+                        ? category.color
+                        : AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -440,7 +467,10 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
             const Divider(height: 24),
             Row(
               children: [
-                Text('Avvisa ', style: TextStyle(color: AppColors.textSecondary)),
+                Text(
+                  'Avvisa ',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
                 _buildDayChip(1),
                 const SizedBox(width: 8),
                 _buildDayChip(2),
@@ -463,7 +493,8 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
     return GestureDetector(
       onTap: () => setState(() => _reminderDaysBefore = days),
       child: Container(
-        width: 36, height: 36,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(8),
@@ -495,7 +526,10 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
           hintStyle: TextStyle(color: AppColors.textTertiary.withAlpha(179)),
           prefixIcon: Icon(Icons.edit_note, color: AppColors.textTertiary),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 16,
+          ),
         ),
         maxLines: 2,
         minLines: 1,
@@ -512,7 +546,8 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
 
     return Container(
       padding: EdgeInsets.only(
-        left: 20, right: 20,
+        left: 20,
+        right: 20,
         bottom: MediaQuery.of(context).padding.bottom + 16,
         top: 16,
       ),
@@ -531,7 +566,13 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
               color: isReady ? null : AppColors.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               boxShadow: isReady
-                  ? [BoxShadow(color: AppColors.primary.withAlpha(40), blurRadius: 8, offset: const Offset(0, 3))]
+                  ? [
+                      BoxShadow(
+                        color: AppColors.primary.withAlpha(40),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
                   : null,
             ),
             child: Material(
@@ -542,24 +583,34 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
                 child: Center(
                   child: _isLoading
                       ? const SizedBox(
-                          width: 24, height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               _isEditing ? Icons.check : Icons.add,
-                              color: isReady ? Colors.white : AppColors.textTertiary,
+                              color: isReady
+                                  ? Colors.white
+                                  : AppColors.textTertiary,
                               size: 22,
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              _isEditing ? 'Salva Modifiche' : 'Aggiungi Abbonamento',
+                              _isEditing
+                                  ? 'Salva Modifiche'
+                                  : 'Aggiungi Abbonamento',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isReady ? Colors.white : AppColors.textTertiary,
+                                color: isReady
+                                    ? Colors.white
+                                    : AppColors.textTertiary,
                               ),
                             ),
                           ],
@@ -610,9 +661,16 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
       categoryId: _selectedCategoryId!,
       frequency: _frequency,
       startDate: _startDate,
+      endDate: _isEditing ? widget.subscription!.endDate : null,
+      nextPaymentDate: Subscription.resolveNextPaymentDate(
+        startDate: _startDate,
+        frequency: _frequency,
+      ),
       reminderEnabled: _reminderEnabled,
       reminderDaysBefore: _reminderDaysBefore,
-      description: _descriptionController.text.isEmpty ? null : _descriptionController.text.trim(),
+      description: _descriptionController.text.isEmpty
+          ? null
+          : _descriptionController.text.trim(),
       isActive: _isEditing ? widget.subscription!.isActive : true,
       createdAt: _isEditing ? widget.subscription!.createdAt : null,
     );
@@ -635,12 +693,16 @@ class _AddSubscriptionScreenState extends State<AddSubscriptionScreen> {
             children: [
               const Icon(Icons.check_circle, color: Colors.white, size: 20),
               const SizedBox(width: 12),
-              Text(_isEditing ? 'Abbonamento modificato' : 'Abbonamento aggiunto'),
+              Text(
+                _isEditing ? 'Abbonamento modificato' : 'Abbonamento aggiunto',
+              ),
             ],
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );

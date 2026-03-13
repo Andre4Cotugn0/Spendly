@@ -142,19 +142,9 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
                             Column(
                               children: [
                                 Image.asset(
-                                  'assets/icon/icon-no-bg.png',
-                                  width: 72,
-                                  height: 72,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'MONEYRA',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 3,
-                                    color: Colors.grey.shade500,
-                                  ),
+                                  'assets/icon/notext-nobg.png',
+                                  width: 88,
+                                  height: 88,
                                 ),
                               ],
                             )
@@ -162,7 +152,7 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
                                 .fadeIn(duration: 300.ms, curve: Curves.easeOut)
                                 .slideY(begin: -0.08, end: 0, duration: 300.ms),
 
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 20),
 
                             // Titolo
                             Text(
@@ -233,5 +223,4 @@ class _ThemeTransitionOverlayState extends State<ThemeTransitionOverlay>
     );
   }
 }
-
 

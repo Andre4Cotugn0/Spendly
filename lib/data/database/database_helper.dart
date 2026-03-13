@@ -180,13 +180,20 @@ class DatabaseHelper {
 
   Future<List<Category>> getAllCategories() async {
     final db = await database;
-    final result = await db.query('categories', orderBy: 'is_default DESC, name ASC');
+    final result = await db.query(
+      'categories',
+      orderBy: 'is_default DESC, name ASC',
+    );
     return result.map((map) => Category.fromMap(map)).toList();
   }
 
   Future<Category?> getCategoryById(String id) async {
     final db = await database;
-    final result = await db.query('categories', where: 'id = ?', whereArgs: [id]);
+    final result = await db.query(
+      'categories',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
     if (result.isEmpty) return null;
     return Category.fromMap(result.first);
   }
@@ -198,22 +205,38 @@ class DatabaseHelper {
 
   Future<int> updateCategory(Category category) async {
     final db = await database;
-    return await db.update('categories', category.toMap(), where: 'id = ?', whereArgs: [category.id]);
+    return await db.update(
+      'categories',
+      category.toMap(),
+      where: 'id = ?',
+      whereArgs: [category.id],
+    );
   }
 
   Future<int> deleteCategory(String id) async {
     final db = await database;
     await db.delete('expenses', where: 'category_id = ?', whereArgs: [id]);
     await db.delete('subscriptions', where: 'category_id = ?', whereArgs: [id]);
-    await db.delete('category_keywords', where: 'category_id = ?', whereArgs: [id]);
-    return await db.delete('categories', where: 'id = ? AND is_default = 0', whereArgs: [id]);
+    await db.delete(
+      'category_keywords',
+      where: 'category_id = ?',
+      whereArgs: [id],
+    );
+    return await db.delete(
+      'categories',
+      where: 'id = ? AND is_default = 0',
+      whereArgs: [id],
+    );
   }
 
   // ===== EXPENSES =====
 
   Future<List<Expense>> getAllExpenses() async {
     final db = await database;
-    final result = await db.query('expenses', orderBy: 'date DESC, created_at DESC');
+    final result = await db.query(
+      'expenses',
+      orderBy: 'date DESC, created_at DESC',
+    );
     return result.map((map) => Expense.fromMap(map)).toList();
   }
 
@@ -232,11 +255,16 @@ class DatabaseHelper {
 
   Future<List<Expense>> getRecentExpenses({int limit = 10}) async {
     final db = await database;
-    final result = await db.query('expenses', orderBy: 'date DESC, created_at DESC', limit: limit);
+    final result = await db.query(
+      'expenses',
+      orderBy: 'date DESC, created_at DESC',
+      limit: limit,
+    );
     return result.map((map) => Expense.fromMap(map)).toList();
   }
 
-  Future<List<Expense>> searchExpenses(String query, {
+  Future<List<Expense>> searchExpenses(
+    String query, {
     String? categoryId,
     DateTime? startDate,
     DateTime? endDate,
@@ -248,14 +276,31 @@ class DatabaseHelper {
     final args = <dynamic>[];
 
     if (query.isNotEmpty) {
-      where.add('(description LIKE ? OR category_id IN (SELECT id FROM categories WHERE name LIKE ?))');
+      where.add(
+        '(description LIKE ? OR category_id IN (SELECT id FROM categories WHERE name LIKE ?))',
+      );
       args.addAll(['%$query%', '%$query%']);
     }
-    if (categoryId != null) { where.add('category_id = ?'); args.add(categoryId); }
-    if (startDate != null) { where.add('date >= ?'); args.add(startDate.toIso8601String()); }
-    if (endDate != null) { where.add('date <= ?'); args.add(endDate.toIso8601String()); }
-    if (minAmount != null) { where.add('amount >= ?'); args.add(minAmount); }
-    if (maxAmount != null) { where.add('amount <= ?'); args.add(maxAmount); }
+    if (categoryId != null) {
+      where.add('category_id = ?');
+      args.add(categoryId);
+    }
+    if (startDate != null) {
+      where.add('date >= ?');
+      args.add(startDate.toIso8601String());
+    }
+    if (endDate != null) {
+      where.add('date <= ?');
+      args.add(endDate.toIso8601String());
+    }
+    if (minAmount != null) {
+      where.add('amount >= ?');
+      args.add(minAmount);
+    }
+    if (maxAmount != null) {
+      where.add('amount <= ?');
+      args.add(maxAmount);
+    }
 
     final result = await db.query(
       'expenses',
@@ -273,7 +318,12 @@ class DatabaseHelper {
 
   Future<int> updateExpense(Expense expense) async {
     final db = await database;
-    return await db.update('expenses', expense.toMap(), where: 'id = ?', whereArgs: [expense.id]);
+    return await db.update(
+      'expenses',
+      expense.toMap(),
+      where: 'id = ?',
+      whereArgs: [expense.id],
+    );
   }
 
   Future<int> deleteExpense(String id) async {
@@ -285,13 +335,20 @@ class DatabaseHelper {
 
   Future<List<Subscription>> getAllSubscriptions() async {
     final db = await database;
-    final result = await db.query('subscriptions', orderBy: 'is_active DESC, name ASC');
+    final result = await db.query(
+      'subscriptions',
+      orderBy: 'is_active DESC, name ASC',
+    );
     return result.map((map) => Subscription.fromMap(map)).toList();
   }
 
   Future<List<Subscription>> getActiveSubscriptions() async {
     final db = await database;
-    final result = await db.query('subscriptions', where: 'is_active = 1', orderBy: 'next_payment_date ASC');
+    final result = await db.query(
+      'subscriptions',
+      where: 'is_active = 1',
+      orderBy: 'next_payment_date ASC',
+    );
     return result.map((map) => Subscription.fromMap(map)).toList();
   }
 
@@ -302,7 +359,12 @@ class DatabaseHelper {
 
   Future<int> updateSubscription(Subscription sub) async {
     final db = await database;
-    return await db.update('subscriptions', sub.toMap(), where: 'id = ?', whereArgs: [sub.id]);
+    return await db.update(
+      'subscriptions',
+      sub.toMap(),
+      where: 'id = ?',
+      whereArgs: [sub.id],
+    );
   }
 
   Future<int> deleteSubscription(String id) async {
@@ -326,7 +388,8 @@ class DatabaseHelper {
     final limit = now.add(Duration(days: days));
     final result = await db.query(
       'subscriptions',
-      where: 'is_active = 1 AND next_payment_date >= ? AND next_payment_date <= ?',
+      where:
+          'is_active = 1 AND next_payment_date >= ? AND next_payment_date <= ?',
       whereArgs: [now.toIso8601String(), limit.toIso8601String()],
       orderBy: 'next_payment_date ASC',
     );
@@ -337,13 +400,21 @@ class DatabaseHelper {
 
   Future<List<Budget>> getBudgetsByMonth(int year, int month) async {
     final db = await database;
-    final result = await db.query('budgets', where: 'month = ? AND year = ?', whereArgs: [month, year]);
+    final result = await db.query(
+      'budgets',
+      where: 'month = ? AND year = ?',
+      whereArgs: [month, year],
+    );
     return result.map((map) => Budget.fromMap(map)).toList();
   }
 
   Future<Budget?> getGlobalBudget(int year, int month) async {
     final db = await database;
-    final result = await db.query('budgets', where: 'category_id IS NULL AND month = ? AND year = ?', whereArgs: [month, year]);
+    final result = await db.query(
+      'budgets',
+      where: 'category_id IS NULL AND month = ? AND year = ?',
+      whereArgs: [month, year],
+    );
     if (result.isEmpty) return null;
     return Budget.fromMap(result.first);
   }
@@ -360,7 +431,12 @@ class DatabaseHelper {
           : [budget.month, budget.year],
     );
     if (existing.isNotEmpty) {
-      return await db.update('budgets', budget.toMap(), where: 'id = ?', whereArgs: [existing.first['id']]);
+      return await db.update(
+        'budgets',
+        budget.toMap(),
+        where: 'id = ?',
+        whereArgs: [existing.first['id']],
+      );
     }
     return await db.insert('budgets', budget.toMap());
   }
@@ -383,12 +459,22 @@ class DatabaseHelper {
     return keywords;
   }
 
-  Future<void> setCategoryKeywords(String categoryId, List<String> keywords) async {
+  Future<void> setCategoryKeywords(
+    String categoryId,
+    List<String> keywords,
+  ) async {
     final db = await database;
     await db.transaction((txn) async {
-      await txn.delete('category_keywords', where: 'category_id = ?', whereArgs: [categoryId]);
+      await txn.delete(
+        'category_keywords',
+        where: 'category_id = ?',
+        whereArgs: [categoryId],
+      );
       for (final keyword in keywords) {
-        await txn.insert('category_keywords', {'category_id': categoryId, 'keyword': keyword.toLowerCase()});
+        await txn.insert('category_keywords', {
+          'category_id': categoryId,
+          'keyword': keyword.toLowerCase(),
+        });
       }
     });
   }
@@ -397,19 +483,31 @@ class DatabaseHelper {
 
   Future<List<Debt>> getAllDebts() async {
     final db = await database;
-    final result = await db.query('debts', orderBy: 'is_settled ASC, due_date ASC, created_at DESC');
+    final result = await db.query(
+      'debts',
+      orderBy: 'is_settled ASC, due_date ASC, created_at DESC',
+    );
     return result.map((map) => Debt.fromMap(map)).toList();
   }
 
   Future<List<Debt>> getActiveDebts() async {
     final db = await database;
-    final result = await db.query('debts', where: 'is_settled = 0', orderBy: 'due_date ASC, created_at DESC');
+    final result = await db.query(
+      'debts',
+      where: 'is_settled = 0',
+      orderBy: 'due_date ASC, created_at DESC',
+    );
     return result.map((map) => Debt.fromMap(map)).toList();
   }
 
   Future<List<Debt>> getDebtsByType(DebtType type) async {
     final db = await database;
-    final result = await db.query('debts', where: 'type = ? AND is_settled = 0', whereArgs: [type.name], orderBy: 'due_date ASC');
+    final result = await db.query(
+      'debts',
+      where: 'type = ? AND is_settled = 0',
+      whereArgs: [type.name],
+      orderBy: 'due_date ASC',
+    );
     return result.map((map) => Debt.fromMap(map)).toList();
   }
 
@@ -420,7 +518,12 @@ class DatabaseHelper {
 
   Future<int> updateDebt(Debt debt) async {
     final db = await database;
-    return await db.update('debts', debt.toMap(), where: 'id = ?', whereArgs: [debt.id]);
+    return await db.update(
+      'debts',
+      debt.toMap(),
+      where: 'id = ?',
+      whereArgs: [debt.id],
+    );
   }
 
   Future<int> deleteDebt(String id) async {
@@ -493,7 +596,11 @@ class DatabaseHelper {
     return daysToUse > 0 ? total / daysToUse : 0;
   }
 
-  Future<List<Expense>> getTopExpenses(int year, int month, {int limit = 5}) async {
+  Future<List<Expense>> getTopExpenses(
+    int year,
+    int month, {
+    int limit = 5,
+  }) async {
     final db = await database;
     final startDate = DateTime(year, month, 1);
     final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
@@ -507,11 +614,19 @@ class DatabaseHelper {
     return result.map((map) => Expense.fromMap(map)).toList();
   }
 
-  Future<List<Map<String, dynamic>>> getMonthlyTotals({int months = 6}) async {
-    final now = DateTime.now();
+  Future<List<Map<String, dynamic>>> getMonthlyTotals({
+    int months = 6,
+    int? endYear,
+    int? endMonth,
+  }) async {
+    final anchorDate = DateTime(
+      endYear ?? DateTime.now().year,
+      endMonth ?? DateTime.now().month,
+      1,
+    );
     final results = <Map<String, dynamic>>[];
     for (int i = months - 1; i >= 0; i--) {
-      final date = DateTime(now.year, now.month - i, 1);
+      final date = DateTime(anchorDate.year, anchorDate.month - i, 1);
       final total = await getTotalByMonth(date.year, date.month);
       results.add({'year': date.year, 'month': date.month, 'total': total});
     }
@@ -552,14 +667,23 @@ class DatabaseHelper {
       await txn.delete('categories');
 
       for (final catData in (data['categories'] as List<dynamic>)) {
-        await txn.insert('categories', Category.fromJson(catData as Map<String, dynamic>).toMap());
+        await txn.insert(
+          'categories',
+          Category.fromJson(catData as Map<String, dynamic>).toMap(),
+        );
       }
       for (final expData in (data['expenses'] as List<dynamic>)) {
-        await txn.insert('expenses', Expense.fromJson(expData as Map<String, dynamic>).toMap());
+        await txn.insert(
+          'expenses',
+          Expense.fromJson(expData as Map<String, dynamic>).toMap(),
+        );
       }
       if (data['subscriptions'] != null) {
         for (final subData in (data['subscriptions'] as List<dynamic>)) {
-          await txn.insert('subscriptions', Subscription.fromJson(subData as Map<String, dynamic>).toMap());
+          await txn.insert(
+            'subscriptions',
+            Subscription.fromJson(subData as Map<String, dynamic>).toMap(),
+          );
         }
       }
       if (data['budgets'] != null) {
@@ -569,12 +693,18 @@ class DatabaseHelper {
       }
       if (data['category_keywords'] != null) {
         for (final kw in (data['category_keywords'] as List<dynamic>)) {
-          await txn.insert('category_keywords', {'category_id': kw['category_id'], 'keyword': kw['keyword']});
+          await txn.insert('category_keywords', {
+            'category_id': kw['category_id'],
+            'keyword': kw['keyword'],
+          });
         }
       }
       if (data['debts'] != null) {
         for (final debtData in (data['debts'] as List<dynamic>)) {
-          await txn.insert('debts', Debt.fromJson(debtData as Map<String, dynamic>).toMap());
+          await txn.insert(
+            'debts',
+            Debt.fromJson(debtData as Map<String, dynamic>).toMap(),
+          );
         }
       }
     });

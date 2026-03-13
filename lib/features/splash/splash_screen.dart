@@ -65,19 +65,9 @@ class _SplashScreenState extends State<SplashScreen>
                     Column(
                       children: [
                         Image.asset(
-                          'assets/icon/icon-no-bg.png',
-                          width: 72,
-                          height: 72,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'MONEYRA',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 3,
-                            color: Colors.grey.shade500,
-                          ),
+                          'assets/icon/notext-nobg.png',
+                          width: 88,
+                          height: 88,
                         ),
                       ],
                     )
@@ -85,9 +75,9 @@ class _SplashScreenState extends State<SplashScreen>
                         .fadeIn(duration: 600.ms, curve: Curves.easeOut)
                         .slideY(begin: -0.1, end: 0, duration: 600.ms),
 
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 20),
 
-                    // Titolo "Moneyra"
+                    // Titolo principale
                     Text(
                       'Moneyra',
                       style: TextStyle(
@@ -153,7 +143,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-
-
-
-

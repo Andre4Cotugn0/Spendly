@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../database/database_helper.dart';
@@ -10,6 +11,12 @@ class CsvExportService {
   static final CsvExportService instance = CsvExportService._();
 
   final DatabaseHelper _db = DatabaseHelper.instance;
+  final DateFormat _dateFormat = DateFormat('dd/MM/yyyy', 'it_IT');
+  final NumberFormat _currencyFormat = NumberFormat.currency(
+    locale: 'it_IT',
+    symbol: '€',
+    decimalDigits: 2,
+  );
 
   /// Esporta tutte le spese in un file CSV e apre il foglio di condivisione.
   /// Restituisce `true` se l'export è andato a buon fine.
@@ -19,31 +26,31 @@ class CsvExportService {
       final expenses = data['expenses'] as List<dynamic>? ?? [];
       final categories = data['categories'] as List<dynamic>? ?? [];
 
-      // Mappa id → nome categoria per rendere il CSV leggibile
       final catMap = <String, String>{};
-      for (final c in categories) {
-        final map = c as Map<String, dynamic>;
+      for (final category in categories) {
+        final map = category as Map<String, dynamic>;
         catMap[map['id'] as String] = map['name'] as String;
       }
 
-      // Header
       final rows = <List<String>>[
         ['Data', 'Importo', 'Categoria', 'Note'],
       ];
 
-      for (final e in expenses) {
-        final map = e as Map<String, dynamic>;
-        final date = map['date'] as String? ?? '';
-        final amount = (map['amount'] ?? 0).toString();
-        final catId = map['categoryId'] as String? ?? '';
-        final catName = catMap[catId] ?? catId;
-        final note = map['note'] as String? ?? '';
-        rows.add([date, amount, catName, note]);
+      for (final expense in expenses) {
+        final map = expense as Map<String, dynamic>;
+        final categoryId = map['category_id'] as String? ?? '';
+        rows.add([
+          _formatDate(map['date']),
+          _formatCurrency(map['amount']),
+          catMap[categoryId] ?? categoryId,
+          map['description'] as String? ?? '',
+        ]);
       }
 
-      final csvString = const ListToCsvConverter().convert(rows);
+      final csvString = const ListToCsvConverter(
+        fieldDelimiter: ';',
+      ).convert(rows);
 
-      // Scrivi file temporaneo
       final dir = await getTemporaryDirectory();
       final now = DateTime.now();
       final fileName =
@@ -51,11 +58,9 @@ class CsvExportService {
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(csvString);
 
-      // Condividi
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'Moneyra - Export spese',
-      );
+      await Share.shareXFiles([
+        XFile(file.path),
+      ], subject: 'Moneyra - Export spese');
 
       return true;
     } catch (e) {
@@ -65,7 +70,7 @@ class CsvExportService {
   }
 
   /// Esporta tutti i dati (spese, categorie, abbonamenti, debiti, budget)
-  /// in un file CSV multi-foglio (sezioni separate da riga vuota + intestazione).
+  /// in un file CSV multi-sezione.
   Future<bool> exportAllData() async {
     try {
       final data = await _db.exportAllData();
@@ -73,75 +78,109 @@ class CsvExportService {
       final categories = data['categories'] as List<dynamic>? ?? [];
       final expenses = data['expenses'] as List<dynamic>? ?? [];
       final subscriptions = data['subscriptions'] as List<dynamic>? ?? [];
+      final budgets = data['budgets'] as List<dynamic>? ?? [];
       final debts = data['debts'] as List<dynamic>? ?? [];
 
-      // Mappa id → nome categoria
       final catMap = <String, String>{};
-      for (final c in categories) {
-        final map = c as Map<String, dynamic>;
+      for (final category in categories) {
+        final map = category as Map<String, dynamic>;
         catMap[map['id'] as String] = map['name'] as String;
       }
 
       final rows = <List<String>>[];
 
-      // === SPESE ===
       rows.add(['--- SPESE ---']);
       rows.add(['Data', 'Importo', 'Categoria', 'Note']);
-      for (final e in expenses) {
-        final map = e as Map<String, dynamic>;
+      for (final expense in expenses) {
+        final map = expense as Map<String, dynamic>;
+        final categoryId = map['category_id'] as String? ?? '';
         rows.add([
-          map['date'] as String? ?? '',
-          (map['amount'] ?? 0).toString(),
-          catMap[map['categoryId'] as String? ?? ''] ?? '',
-          map['note'] as String? ?? '',
+          _formatDate(map['date']),
+          _formatCurrency(map['amount']),
+          catMap[categoryId] ?? categoryId,
+          map['description'] as String? ?? '',
         ]);
       }
 
-      // === CATEGORIE ===
       rows.add([]);
       rows.add(['--- CATEGORIE ---']);
       rows.add(['ID', 'Nome', 'Icona', 'Colore']);
-      for (final c in categories) {
-        final map = c as Map<String, dynamic>;
+      for (final category in categories) {
+        final map = category as Map<String, dynamic>;
         rows.add([
           map['id'] as String? ?? '',
           map['name'] as String? ?? '',
-          map['icon'] as String? ?? '',
-          map['color'] as String? ?? '',
+          map['icon_name'] as String? ?? '',
+          '${map['color'] ?? ''}',
         ]);
       }
 
-      // === ABBONAMENTI ===
       rows.add([]);
       rows.add(['--- ABBONAMENTI ---']);
-      rows.add(['Nome', 'Importo', 'Frequenza', 'Data rinnovo', 'Attivo']);
-      for (final s in subscriptions) {
-        final map = s as Map<String, dynamic>;
+      rows.add([
+        'Nome',
+        'Importo',
+        'Frequenza',
+        'Categoria',
+        'Data rinnovo',
+        'Attivo',
+        'Note',
+      ]);
+      for (final subscription in subscriptions) {
+        final map = subscription as Map<String, dynamic>;
+        final categoryId = map['category_id'] as String? ?? '';
         rows.add([
           map['name'] as String? ?? '',
-          (map['amount'] ?? 0).toString(),
+          _formatCurrency(map['amount']),
           map['frequency'] as String? ?? '',
-          map['nextBillingDate'] as String? ?? '',
-          (map['isActive'] == true).toString(),
+          catMap[categoryId] ?? categoryId,
+          _formatDate(map['next_payment_date']),
+          _formatYesNo(map['is_active']),
+          map['description'] as String? ?? '',
         ]);
       }
 
-      // === DEBITI ===
+      rows.add([]);
+      rows.add(['--- BUDGET ---']);
+      rows.add(['Categoria', 'Importo', 'Mese', 'Anno']);
+      for (final budget in budgets) {
+        final map = Map<String, dynamic>.from(budget as Map);
+        final categoryId = map['category_id'] as String?;
+        rows.add([
+          categoryId == null ? 'Globale' : (catMap[categoryId] ?? categoryId),
+          _formatCurrency(map['amount']),
+          '${map['month'] ?? ''}',
+          '${map['year'] ?? ''}',
+        ]);
+      }
+
       rows.add([]);
       rows.add(['--- DEBITI ---']);
-      rows.add(['Persona', 'Importo', 'Pagato', 'Tipo', 'Saldato']);
-      for (final d in debts) {
-        final map = d as Map<String, dynamic>;
+      rows.add([
+        'Persona',
+        'Importo',
+        'Pagato',
+        'Tipo',
+        'Scadenza',
+        'Saldato',
+        'Note',
+      ]);
+      for (final debt in debts) {
+        final map = debt as Map<String, dynamic>;
         rows.add([
-          map['personName'] as String? ?? '',
-          (map['amount'] ?? 0).toString(),
-          (map['amountPaid'] ?? 0).toString(),
+          map['person_name'] as String? ?? '',
+          _formatCurrency(map['amount']),
+          _formatCurrency(map['amount_paid']),
           map['type'] as String? ?? '',
-          (map['isSettled'] == true).toString(),
+          _formatDate(map['due_date']),
+          _formatYesNo(map['is_settled']),
+          map['description'] as String? ?? '',
         ]);
       }
 
-      final csvString = const ListToCsvConverter().convert(rows);
+      final csvString = const ListToCsvConverter(
+        fieldDelimiter: ';',
+      ).convert(rows);
 
       final dir = await getTemporaryDirectory();
       final now = DateTime.now();
@@ -150,15 +189,56 @@ class CsvExportService {
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(csvString);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'Moneyra - Export completo',
-      );
+      await Share.shareXFiles([
+        XFile(file.path),
+      ], subject: 'Moneyra - Export completo');
 
       return true;
     } catch (e) {
       debugPrint('Errore export completo CSV: $e');
       return false;
     }
+  }
+
+  String _formatDate(dynamic value) {
+    if (value is! String || value.isEmpty) {
+      return '';
+    }
+
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) {
+      return value;
+    }
+
+    return _dateFormat.format(parsed);
+  }
+
+  String _formatCurrency(dynamic value) {
+    if (value == null) {
+      return '';
+    }
+
+    final numericValue = switch (value) {
+      num number => number.toDouble(),
+      String text => double.tryParse(text),
+      _ => null,
+    };
+
+    if (numericValue == null) {
+      return '$value';
+    }
+
+    return _currencyFormat.format(numericValue);
+  }
+
+  String _formatYesNo(dynamic value) {
+    final isEnabled = switch (value) {
+      bool flag => flag,
+      num number => number != 0,
+      String text => text == 'true' || text == '1',
+      _ => false,
+    };
+
+    return isEnabled ? 'Si' : 'No';
   }
 }
